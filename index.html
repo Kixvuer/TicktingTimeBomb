@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eksplorasi Geospasial: Krisis Pesisir Indonesia</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <!-- Leaflet CSS & JS (Dengan Integrity Keys Resmi) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <style>
         @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -20,17 +23,18 @@
         .animate-ocean-surge { animation: ocean-surge 3s ease-in-out infinite; }
         .live-indicator { animation: pulse-ring 2s infinite; }
         
-        .page-transition { transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out; }
-        .hidden-page { opacity: 0; visibility: hidden; pointer-events: none; position: absolute; width: 100%; }
-        #map { z-index: 10; cursor: crosshair; }
+        /* Animasi Transisi Halaman */
+        .page-transition { transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out; }
+        .hidden-page { opacity: 0; visibility: hidden; pointer-events: none; position: absolute; width: 100%; top: 0; left: 0; }
         
-        /* Custom Map Tooltip */
-        .leaflet-popup-content-wrapper { background: #082f49; color: #bae6fd; border-radius: 8px; }
+        /* Custom Map Styles */
+        .leaflet-popup-content-wrapper { background: #082f49; color: #bae6fd; border-radius: 8px; font-family: ui-sans-serif, system-ui, sans-serif; }
         .leaflet-popup-tip { background: #082f49; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen selection:bg-sky-200 selection:text-sky-900">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen selection:bg-sky-200 selection:text-sky-900 overflow-x-hidden">
 
+    <!-- ================= LANDING PAGE ================= -->
     <section id="landing-page" class="page-transition min-h-screen flex flex-col justify-center items-center bg-cyan-950 text-white p-6 relative overflow-hidden">
         <svg class="absolute bottom-0 left-0 w-full animate-ocean-surge opacity-20" viewBox="0 0 1440 320" preserveAspectRatio="none">
             <path fill="#0ea5e9" fill-opacity="1" d="M0,192L48,197.3C96,203,192,213,288,202.7C384,192,480,160,576,149.3C672,139,768,149,864,181.3C960,213,1056,267,1152,261.3C1248,256,1344,192,1392,160L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
@@ -43,7 +47,7 @@
                 Eksplorasi Spasial<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">Pesisir Nusantara</span>
             </h1>
             <p class="text-lg md:text-xl text-cyan-100 max-w-3xl mx-auto leading-relaxed opacity-90">
-                Klik titik mana saja di sepanjang >81.000 km garis pantai Indonesia. Sistem akan mengekstrak data hidrografi dan geologi untuk memproyeksikan ancaman spesifik di koordinat tersebut.
+                Klik titik mana saja di sepanjang garis pantai Indonesia. Sistem akan mengekstrak data hidrografi dan geologi untuk memproyeksikan ancaman spesifik di koordinat tersebut.
             </p>
             <button id="exploreBtn" class="mt-8 bg-sky-500 hover:bg-sky-400 text-cyan-950 font-black py-4 px-12 rounded-full text-lg shadow-[0_0_40px_rgba(14,165,233,0.5)] transform hover:scale-105 transition duration-300">
                 Mulai Ekstraksi Data
@@ -51,7 +55,8 @@
         </div>
     </section>
 
-    <section id="dashboard-page" class="page-transition hidden-page min-h-screen p-4 md:p-6 bg-slate-100">
+    <!-- ================= DASHBOARD PAGE ================= -->
+    <section id="dashboard-page" class="page-transition hidden-page min-h-screen w-full p-4 md:p-6 bg-slate-100 relative">
         <div class="max-w-7xl mx-auto space-y-6">
             
             <header class="flex flex-col md:flex-row justify-between items-center py-4 px-6 bg-white rounded-2xl shadow-sm border border-slate-200 gap-4">
@@ -65,9 +70,13 @@
                 </div>
             </header>
 
+            <!-- PETA INTERAKTIF SECTION (Fix Ukuran Peta) -->
             <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 relative">
-                <div id="map" class="w-full h-[450px] rounded-xl border border-slate-200"></div>
-                <div id="mapLoading" class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm rounded-2xl z-20 hidden flex justify-center items-center">
+                <!-- Tambahan style CSS sebaris (inline) untuk memastikan peta selalu punya tinggi/lebar -->
+                <div id="map" style="width: 100%; height: 450px; z-index: 10;" class="rounded-xl border border-slate-200 cursor-crosshair"></div>
+                
+                <!-- Overlay Loading Peta -->
+                <div id="mapLoading" class="absolute inset-0 bg-slate-900/30 backdrop-blur-sm rounded-2xl z-20 hidden flex justify-center items-center">
                     <div class="bg-white px-6 py-3 rounded-full shadow-xl text-sky-700 font-bold flex items-center">
                         <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-sky-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         Mengekstrak Data Koordinat...
@@ -76,13 +85,12 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
+                <!-- Kolom Kiri: Detail Lokasi & API Live -->
                 <div class="lg:col-span-1 space-y-6">
-                    
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-sky-50 rounded-bl-full -z-10"></div>
                         <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Titik Ekstraksi Aktif:</h3>
-                        <p id="locationName" class="text-2xl font-black text-slate-800 leading-tight mb-2 min-h-[60px] flex items-center">Belum ada wilayah terpilih</p>
+                        <p id="locationName" class="text-xl font-black text-slate-800 leading-tight mb-2 min-h-[60px] flex items-center">Belum ada wilayah terpilih</p>
                         <p class="text-sm font-mono text-sky-600 mb-6 bg-sky-50 py-1 px-3 rounded-md inline-block">Lat: <span id="latDisplay">-</span>, Lon: <span id="lonDisplay">-</span></p>
 
                         <label class="block text-sm font-bold text-slate-700 mb-3">
@@ -99,13 +107,13 @@
                             </h3>
                         </div>
                         <div id="liveDataContent" class="min-h-[100px] flex flex-col justify-center">
-                            <p class="text-sm text-slate-400 italic">Silakan klik area di peta untuk memuat data hidrodinamika.</p>
+                            <p class="text-sm text-slate-400 italic">Silakan klik area laut/pesisir di peta untuk memuat data hidrodinamika satelit.</p>
                         </div>
                     </div>
                 </div>
 
+                <!-- Kolom Kanan: Metrik, Edukasi, & Grafik -->
                 <div class="lg:col-span-2 space-y-6">
-                    
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 text-center">
                             <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Estimasi Amblesan</p>
@@ -116,7 +124,7 @@
                             <p class="text-3xl font-black text-blue-500 mt-2"><span id="slrRate">4.5</span> <span class="text-sm font-semibold text-slate-400">mm/thn</span></p>
                         </div>
                         <div class="bg-gradient-to-br from-sky-500 to-cyan-600 p-5 rounded-2xl shadow-md text-white text-center transform transition hover:-translate-y-1">
-                            <p class="text-xs text-sky-100 font-bold uppercase tracking-wider">Total Kenaikan Air Relatif</p>
+                            <p class="text-xs text-sky-100 font-bold uppercase tracking-wider">Total Kenaikan Relatif</p>
                             <p class="text-4xl font-black mt-2"><span id="totalRise">0</span> <span class="text-lg font-medium text-sky-200">cm</span></p>
                         </div>
                     </div>
@@ -135,12 +143,12 @@
                             </p>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- ================= LOGIKA JAVASCRIPT ================= -->
     <script>
         // State Global Aplikasi
         let currentLat = null;
@@ -150,87 +158,82 @@
         let map;
         let activeMarker;
 
-        // 1. Inisialisasi Peta Leaflet
+        // 1. Inisialisasi Peta Leaflet yang Diperbaiki
         function initMap() {
-            if(map) return; 
-            map = L.map('map').setView([-2.0, 118.0], 5); // Tampilan utuh Indonesia
+            if(!map) {
+                // Buat peta pertama kali
+                map = L.map('map').setView([-2.0, 118.0], 5); 
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 18,
-                attribution: '© OpenStreetMap | Marine Data by Open-Meteo'
-            }).addTo(map);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 18,
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
 
-            // Event Listener: Deteksi Klik Bebas pada Peta
-            map.on('click', async function(e) {
-                const lat = parseFloat(e.latlng.lat.toFixed(4));
-                const lon = parseFloat(e.latlng.lng.toFixed(4));
-                
-                // Pindahkan Marker
-                if (activeMarker) { map.removeLayer(activeMarker); }
-                activeMarker = L.marker([lat, lon]).addTo(map);
-                activeMarker.bindPopup(`Mengekstrak data di ${lat}, ${lon}...`).openPopup();
+                // Event Listener Klik
+                map.on('click', async function(e) {
+                    const lat = parseFloat(e.latlng.lat.toFixed(4));
+                    const lon = parseFloat(e.latlng.lng.toFixed(4));
+                    
+                    if (activeMarker) { map.removeLayer(activeMarker); }
+                    activeMarker = L.marker([lat, lon]).addTo(map);
+                    activeMarker.bindPopup(`Mengekstrak data di ${lat}, ${lon}...`).openPopup();
 
-                currentLat = lat;
-                currentLon = lon;
-                document.getElementById('latDisplay').innerText = lat;
-                document.getElementById('lonDisplay').innerText = lon;
+                    currentLat = lat;
+                    currentLon = lon;
+                    document.getElementById('latDisplay').innerText = lat;
+                    document.getElementById('lonDisplay').innerText = lon;
 
-                // Tampilkan loading UI
-                document.getElementById('mapLoading').classList.remove('hidden');
-
-                // Eksekusi Pemrosesan Data Spasial
-                await processGeospatialData(lat, lon);
-                
-                // Hilangkan loading UI
-                document.getElementById('mapLoading').classList.add('hidden');
-            });
+                    document.getElementById('mapLoading').classList.remove('hidden');
+                    await processGeospatialData(lat, lon);
+                    document.getElementById('mapLoading').classList.add('hidden');
+                });
+            }
+            
+            // JURUS RAHASIA: Memaksa peta menyesuaikan ukuran layarnya!
+            setTimeout(() => { map.invalidateSize(); }, 100);
             setTimeout(() => { map.invalidateSize(); }, 500);
         }
 
-        // 2. Mesin Geospasial Heuristik (Penentu Karakteristik Tanah)
+        // 2. Mesin Geospasial Heuristik
         function analyzeCoastalGeology(lat, lon) {
-            // Simulasi Bounding Box berbasis zona geografi riil Indonesia
-            
-            // Pantura Jawa (Tanah Aluvial Ekstrem)
+            // Pantura Jawa 
             if (lat > -7.5 && lat < -5.5 && lon > 105.5 && lon < 114.5) {
-                let severity = 30 + Math.random() * 50; // Randomize 30-80mm untuk realisme grid
-                if (lon > 109.0 && lon < 111.0) severity += 40; // Hotspot Pekalongan-Semarang
+                let severity = 30 + Math.random() * 50; 
+                if (lon > 109.0 && lon < 111.0) severity += 40; // Pekalongan-Semarang
                 return {
                     rate: parseFloat(severity.toFixed(1)),
-                    desc: "Kawasan ini terdeteksi berada di Pesisir Utara Jawa (Pantura). Struktur tanah berupa aluvial muda yang sangat lunak. Ekstraksi air tanah tanah massal memicu laju amblesan tanah (subsidence) paling ekstrem di Indonesia. Ini adalah zona krisis utama banjir rob."
+                    desc: "Kawasan ini terdeteksi berada di Pesisir Utara Jawa (Pantura). Struktur tanah berupa aluvial muda yang sangat lunak. Ekstraksi air tanah memicu laju amblesan (subsidence) ekstrem. Ini adalah zona krisis utama banjir rob."
                 };
             }
-            // Pesisir Timur Sumatera (Lahan Gambut & Muara)
+            // Sumatera Timur 
             if (lat > -4.5 && lat < 4.0 && lon > 97.0 && lon < 105.5) {
                 return {
                     rate: parseFloat((5 + Math.random() * 15).toFixed(1)),
-                    desc: "Sistem mendeteksi area berpotensi tanah gambut atau endapan sedimen muara sungai di Sumatera. Area ini mengalami amblesan tanah secara alamiah karena kompaksi organik (konsolidasi) dan pengeringan lahan gambut, diperparah intrusi air laut."
+                    desc: "Sistem mendeteksi area berpotensi tanah gambut atau endapan sedimen muara sungai di Sumatera. Area ini mengalami amblesan karena pengeringan lahan gambut, diperparah intrusi air laut."
                 };
             }
-            // Pesisir Kalimantan (Gambut & Delta Sungai)
+            // Kalimantan Pesisir
             if (lat > -4.0 && lat < 4.5 && lon > 108.0 && lon < 118.0) {
                 return {
                     rate: parseFloat((2 + Math.random() * 8).toFixed(1)),
-                    desc: "Kawasan tepian pesisir atau delta sungai Kalimantan. Memiliki topografi yang sangat datar dan rendah. Ancaman utama datang dari kombinasi pasang surut laut yang mendorong air muara meluap akibat turunnya muka daratan perlahan."
+                    desc: "Kawasan tepian pesisir atau delta sungai Kalimantan. Ancaman utama datang dari kombinasi pasang surut laut yang mendorong air muara meluap akibat turunnya muka daratan perlahan."
                 };
             }
-            // Indonesia Timur / Selatan Jawa / Geologi Keras
+            // Indonesia Timur / Selatan Jawa
             return {
                 rate: parseFloat((Math.random() * 1.5).toFixed(1)), // Hampir Nol
-                desc: "Wilayah ini terdeteksi berada di sabuk geologi berbatu atau struktur daratan yang stabil. Laju penurunan muka tanah hampir dapat diabaikan. Tantangan utama pesisir ini murni berasal dari anomali iklim global (Sea Level Rise dan Gelombang Ekstrem)."
+                desc: "Wilayah ini terdeteksi berada di struktur daratan yang geologisnya keras dan stabil. Laju penurunan muka tanah hampir dapat diabaikan. Tantangan utama pesisir ini murni berasal dari Kenaikan Muka Air Laut (SLR) global."
             };
         }
 
-        // 3. Reverse Geocoding (Cari Nama Tempat dari Koordinat)
+        // 3. Reverse Geocoding API
         async function fetchLocationName(lat, lon) {
             try {
-                // Menggunakan API Nominatim gratis (batas 1 request/detik)
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10`);
                 if (!res.ok) throw new Error("API Limit");
                 const data = await res.json();
                 
-                // Bersihkan nama jika posisinya di laut lepas
-                if(data.error) return "Perairan Lepas / Zona Laut";
+                if(data.error) return "Perairan / Zona Laut";
                 
                 let placeName = data.name || data.address.county || data.address.city || data.address.state || "Wilayah Pesisir";
                 let region = data.address.state ? `, ${data.address.state}` : '';
@@ -240,36 +243,30 @@
             }
         }
 
-        // 4. Orkestrasi Pemrosesan Data saat Peta Diklik
+        // 4. Orkestrasi Pemrosesan Data
         async function processGeospatialData(lat, lon) {
-            // A. Dapatkan Nama Lokasi
             const locName = await fetchLocationName(lat, lon);
             document.getElementById('locationName').innerText = locName;
             
-            // B. Analisis Geologi
             const geologyInfo = analyzeCoastalGeology(lat, lon);
             currentSubRate = geologyInfo.rate;
             document.getElementById('eduText').innerText = geologyInfo.desc;
             activeMarker.setPopupContent(`<b>${locName}</b><br>Subsidence: ${currentSubRate} mm/yr`).openPopup();
 
-            // C. Dapatkan Data Laut API Real-Time
             await fetchLiveOceanData(lat, lon);
-
-            // D. Hitung Ulang Grafik
             updateDashboardCalc();
         }
 
-        // 5. Fetch API Hidro-Oseanografi (Open-Meteo)
+        // 5. Fetch API Laut
         async function fetchLiveOceanData(lat, lon) {
             const container = document.getElementById('liveDataContent');
-            container.innerHTML = '<p class="text-sm text-sky-200 animate-pulse">Menyelaraskan koneksi dengan satelit altimetri...</p>';
+            container.innerHTML = '<p class="text-sm text-sky-200 animate-pulse">Menyelaraskan koneksi dengan satelit kelautan...</p>';
 
             try {
-                const res = await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&current=wave_height,ocean_current_velocity,mean_wave_direction`);
+                const res = await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&current=wave_height,ocean_current_velocity`);
                 
-                // Jika titik diklik terlalu jauh di daratan (bukan laut), API mengembalikan error
                 if (!res.ok) {
-                    container.innerHTML = `<p class="text-sm text-orange-300">Titik ini berada di daratan (inland). Data gelombang satelit kelautan tidak berlaku. Namun kalkulasi penurunan tanah tetap relevan.</p>`;
+                    container.innerHTML = `<p class="text-sm text-orange-300">Titik ini berada di daratan (inland) yang tidak dijangkau satelit laut, atau API menolak koneksi. Kalkulasi data amblesan tetap berfungsi.</p>`;
                     return;
                 }
 
@@ -290,7 +287,7 @@
                     </div>
                 `;
             } catch (err) {
-                container.innerHTML = `<p class="text-sm text-red-400">Koneksi API Kelautan terputus / Parameter di luar batas (Out of Bounds).</p>`;
+                container.innerHTML = `<p class="text-sm text-red-400">Koneksi API Kelautan terputus. Coba klik koordinat lain di laut lepas.</p>`;
             }
         }
 
@@ -302,7 +299,7 @@
                 labels: ['Proyeksi (cm)'],
                 datasets: [
                     { label: 'Global Sea Level Rise', data: [0], backgroundColor: '#3b82f6', borderRadius: 6 },
-                    { label: 'Amblesan Tanah (Subsidence)', data: [0], backgroundColor: '#f97316', borderRadius: 6 }
+                    { label: 'Amblesan Tanah', data: [0], backgroundColor: '#f97316', borderRadius: 6 }
                 ]
             },
             options: {
@@ -317,35 +314,31 @@
             }
         });
 
-        // 7. Update Kalkulasi & UI
+        // 7. Update Kalkulasi Dashboard
         const yearSlider = document.getElementById('yearSlider');
         function updateDashboardCalc() {
-            if (currentLat === null) return; // Jika belum klik peta, jangan hitung
+            if (currentLat === null) return; 
 
             const targetYear = parseInt(yearSlider.value);
             const baseYear = 2026;
             const yearsElapsed = targetYear - baseYear;
 
-            // Hitung (mm ubah ke cm -> bagi 10)
             const subCm = (currentSubRate * yearsElapsed) / 10;
             const slrCm = (slrRateGlobal * yearsElapsed) / 10;
             const totalCm = subCm + slrCm;
 
-            // Update DOM
             document.getElementById('yearDisplay').innerText = targetYear;
             document.getElementById('subRate').innerText = currentSubRate;
             document.getElementById('slrRate').innerText = slrRateGlobal;
             document.getElementById('totalRise').innerText = totalCm.toFixed(1);
 
-            // Update Chart
             chartInstance.data.datasets[0].data = [slrCm];
             chartInstance.data.datasets[1].data = [subCm];
             chartInstance.update();
         }
-
         yearSlider.addEventListener('input', updateDashboardCalc);
 
-        // --- Transisi Halaman Navigasi ---
+        // --- Transisi Halaman (Dilengkapi Invalidate Size) ---
         const landingPage = document.getElementById('landing-page');
         const dashboardPage = document.getElementById('dashboard-page');
         
@@ -353,13 +346,13 @@
             landingPage.classList.add('hidden-page');
             setTimeout(() => {
                 dashboardPage.classList.remove('hidden-page');
-                initMap(); 
-            }, 800);
+                initMap(); // Panggil fungsi inisialisasi peta setelah layar muncul
+            }, 600);
         });
 
         document.getElementById('backBtn').addEventListener('click', () => {
             dashboardPage.classList.add('hidden-page');
-            setTimeout(() => { landingPage.classList.remove('hidden-page'); }, 800);
+            setTimeout(() => { landingPage.classList.remove('hidden-page'); }, 600);
         });
 
     </script>
