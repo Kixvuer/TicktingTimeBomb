@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
-        .page-transition { transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out; }
+        .page-transition { transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out; }
         .hidden-page { opacity: 0; visibility: hidden; pointer-events: none; position: absolute; width: 100%; top: 0; left: 0; }
         #map { z-index: 10; cursor: crosshair; }
         .leaflet-popup-content-wrapper { background: #0f172a; color: #bae6fd; border-radius: 8px; font-family: monospace; }
@@ -24,152 +24,152 @@
         @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         /* CSS untuk Markdown Gemini */
-        .prose strong { color: #312e81; }
-        .prose p { margin-bottom: 0.5rem; }
+        .ai-content h3 { font-weight: bold; color: #1e3a8a; margin-top: 10px; margin-bottom: 5px; font-size: 1.1em;}
+        .ai-content p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .ai-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        .ai-content strong { color: #111827; }
+        
+        /* Transisi gambar banner */
+        #locationImageBanner { transition: background-image 0.5s ease-in-out; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen selection:bg-sky-200 selection:text-sky-900 overflow-x-hidden">
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen selection:bg-sky-200 selection:text-sky-900 overflow-x-hidden">
 
     <!-- ================= LANDING PAGE ================= -->
     <section id="landing-page" class="page-transition min-h-screen flex flex-col justify-center items-center bg-slate-900 text-white p-6 relative">
         <div class="max-w-5xl text-center space-y-6 relative z-20">
             <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-8">
-                Model Kenaikan Muka Air Relatif<br><span class="text-sky-400">Integrasi Data Satelit Kelautan & AI</span>
+                Dashboard Analisis Pesisir<br><span class="text-sky-400">Terintegrasi AI & Data Satelit</span>
             </h1>
-            
+            <p class="text-slate-400 max-w-2xl mx-auto mb-8">Platform simulasi dampak kenaikan muka air laut dan amblesan tanah, dilengkapi asisten kecerdasan buatan (Gemini) untuk menganalisis isu lokal secara real-time.</p>
             <button id="exploreBtn" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-4 px-10 rounded-lg shadow-lg transition duration-300">
-                Inisialisasi Workspace
+                Buka Peta Interaktif
             </button>
         </div>
     </section>
 
     <!-- ================= DASHBOARD PAGE ================= -->
-    <section id="dashboard-page" class="page-transition hidden-page min-h-screen w-full p-2 md:p-4 bg-slate-100 relative">
-        <div class="max-w-7xl mx-auto">
+    <section id="dashboard-page" class="page-transition hidden-page min-h-screen w-full relative pt-0">
+        
+        <!-- Navbar Compact -->
+        <div class="w-full bg-slate-900 text-white flex justify-between items-center px-4 py-3 shadow-md z-50 relative">
+            <span class="font-bold text-sm md:text-base tracking-wide text-sky-400">🛰️ Spatial Oceanography System</span>
+            <button id="backBtn" class="text-[10px] font-bold bg-slate-800 text-slate-300 hover:text-white hover:bg-red-600 px-3 py-1.5 rounded transition">
+                ✕ KELUAR
+            </button>
+        </div>
+
+        <div class="w-full max-w-7xl mx-auto p-3 md:p-6 space-y-4 md:space-y-6">
             
-            <!-- Peta & Input Credentials -->
+            <!-- Peta & Metrik Ringkas -->
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
                 
                 <!-- PETA -->
-                <div class="lg:col-span-3 bg-white p-2 rounded-xl shadow-sm border border-slate-200 relative">
+                <div class="lg:col-span-3 bg-white p-1.5 rounded-xl shadow border border-slate-200 relative">
                     <div id="map" style="width: 100%; height: 420px;" class="rounded-lg border border-slate-200"></div>
-                    <div id="mapLoading" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-xl z-20 hidden flex justify-center items-center">
+                    <div id="mapLoading" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm rounded-xl z-20 hidden flex justify-center items-center">
                         <div class="bg-white px-6 py-3 rounded-lg shadow-xl text-sky-700 font-bold flex items-center">
-                            <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-200 h-6 w-6 mr-3"></div>
-                            Mengekstrak Data Geospasial...
+                            <div class="loader ease-linear rounded-full border-4 border-t-4 border-sky-500 h-6 w-6 mr-3"></div>
+                            Menganalisis Koordinat & Memanggil AI...
                         </div>
                     </div>
                 </div>
 
-                <!-- Panel Copernicus Auth -->
-                <div class="lg:col-span-1 bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-700 text-white flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider">Koneksi API (CMEMS)</h3>
-                            <button id="backBtn" class="text-[10px] bg-slate-800 hover:bg-red-500 hover:text-white text-slate-400 px-2 py-1 rounded transition font-bold">
-                                ✕ KELUAR
-                            </button>
+                <!-- Panel Metrik -->
+                <div class="lg:col-span-1 flex flex-col gap-4">
+                    <!-- Status Lokasi dengan Gambar Dynamic -->
+                    <div class="bg-white rounded-xl shadow border border-slate-200 flex-1 overflow-hidden flex flex-col">
+                        <!-- Banner Gambar -->
+                        <div id="locationImageBanner" class="h-28 w-full bg-slate-300 bg-cover bg-center relative" style="background-image: url('https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=600&auto=format&fit=crop');">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                            <h3 class="absolute bottom-2 left-3 text-[10px] font-bold text-sky-300 uppercase tracking-widest z-10">Titik Analisis</h3>
                         </div>
-                        <p class="text-[10px] text-slate-400 mb-4">Masukkan kredensial untuk menarik data Sea Level Anomaly (SLA) Raster secara real-time.</p>
                         
-                        <label class="block text-xs text-slate-300 mb-1">Username CMEMS</label>
-                        <input type="text" id="cmemsUser" placeholder="e.g., mfarhan1" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm mb-3 focus:outline-none focus:border-sky-500 text-white">
-                        
-                        <label class="block text-xs text-slate-300 mb-1">Password CMEMS</label>
-                        <input type="password" id="cmemsPass" placeholder="••••••••" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm mb-3 focus:outline-none focus:border-sky-500 text-white">
+                        <div class="p-4 flex flex-col justify-between flex-1 bg-white">
+                            <p id="locationName" class="text-sm font-bold text-slate-800 leading-tight mb-3">Belum ada titik yang diklik</p>
+                            <div>
+                                <p class="text-[10px] font-mono text-sky-700 bg-sky-50 py-1 px-2 rounded inline-block border border-sky-100">
+                                    Lat: <span id="authLat">-</span>, Lon: <span id="authLon">-</span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div class="bg-slate-800 p-3 rounded border border-slate-600 mt-2">
-                        <p class="text-[10px] text-sky-300 font-mono mb-2">LAT: <span id="authLat">-</span> | LON: <span id="authLon">-</span></p>
-                        <button id="copernicusBtn" onclick="triggerCopernicusFetch()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded transition flex justify-center items-center">
-                            Tarik Data Raster Titik Ini
-                        </button>
-                        <div id="copernicusStatus" class="mt-2 text-[10px] min-h-[16px] text-center"></div>
+
+                    <!-- Data Metrik -->
+                    <div class="bg-slate-900 p-4 rounded-xl shadow border border-slate-700 text-white flex flex-col justify-center space-y-3">
+                        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                            <span class="text-xs text-slate-400">Elevasi Daratan</span>
+                            <span class="font-mono text-sm font-bold text-emerald-400"><span id="elevDisplay">0.0</span> m</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                            <span class="text-xs text-slate-400">Laju Amblesan</span>
+                            <span class="font-mono text-sm font-bold text-orange-400"><span id="subRateDisplay">0.0</span> mm/yr</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                            <span class="text-xs text-slate-400">Trend SLA Aktual</span>
+                            <span class="font-mono text-sm font-bold text-blue-400"><span id="slrRateDisplay">4.5</span> mm/yr</span>
+                        </div>
+                        <div id="liveOceanData" class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400">Gelombang / Surge</span>
+                            <span class="font-mono text-sm font-bold text-sky-300">- / -</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Metrik & Visualisasi Relatif -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
-                <!-- Data Hidro-Oseanografi -->
-                <div class="lg:col-span-1 space-y-4">
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b pb-2 mb-3">Analisis Profil Titik</h3>
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-slate-600">Elevasi Daratan (MDPL)</span>
-                                <span class="font-mono font-bold text-emerald-600"><span id="elevDisplay">0.0</span> m</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-slate-600">Amblesan (Subsidence)</span>
-                                <span class="font-mono font-bold text-orange-500"><span id="subRateDisplay">0.0</span> mm/yr</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-slate-600">Trend SLA Aktual</span>
-                                <span class="font-mono font-bold text-blue-500"><span id="slrRateDisplay">4.5</span> mm/yr</span>
-                            </div>
+            <!-- Area Bawah: Grafik & Penjelasan AI -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                
+                <!-- Grafik Proyeksi -->
+                <div class="bg-white p-5 rounded-xl shadow border border-slate-200">
+                    <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                        <h3 id="chartTitle" class="font-bold text-slate-800 text-sm">Proyeksi Elevasi Daratan vs MSL</h3>
+                        <div class="flex items-center bg-slate-50 p-1.5 rounded border border-slate-200 text-xs">
+                            <label class="text-slate-500 font-semibold uppercase mr-2">Tahun:</label>
+                            <input type="number" id="startYear" value="2026" class="w-14 border border-slate-300 rounded px-1 text-center font-mono outline-none">
+                            <span class="mx-1 text-slate-400">-</span>
+                            <input type="number" id="endYear" value="2100" class="w-14 border border-slate-300 rounded px-1 text-center font-mono outline-none">
                         </div>
                     </div>
-
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b pb-2 mb-3">Kondisi Laut Aktual (Open-Meteo)</h3>
-                        <div id="liveOceanData" class="space-y-2">
-                            <p class="text-xs text-slate-500 italic">Klik pada wilayah laut/pesisir di peta.</p>
-                        </div>
+                    <div class="h-[250px] relative w-full">
+                        <canvas id="relativeChart"></canvas>
                     </div>
-                </div>
-
-                <!-- Grafik Proyeksi & Gemini AI Section -->
-                <div class="lg:col-span-2 space-y-4">
-                    <!-- Chart Panel -->
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
-                            <div>
-                                <h3 id="chartTitle" class="font-bold text-slate-800">Proyeksi Elevasi Daratan vs MSL</h3>
-                                <span class="text-xs bg-sky-100 text-sky-800 px-2 py-1 rounded font-mono">Datum: Geoid Lokal</span>
-                            </div>
-                            
-                            <!-- PENGATURAN TAHUN DINAMIS -->
-                            <div class="flex items-center bg-slate-50 p-2 rounded-lg border border-slate-200 shadow-sm space-x-2 text-sm">
-                                <label class="text-slate-600 font-semibold text-xs uppercase tracking-wider">Rentang:</label>
-                                <input type="number" id="startYear" value="2026" min="1900" max="2500" class="w-16 border border-slate-300 rounded px-1 py-1 text-center font-mono focus:ring-2 focus:ring-sky-400 outline-none transition">
-                                <span class="text-slate-400 font-bold">-</span>
-                                <input type="number" id="endYear" value="2100" min="2027" max="2500" class="w-16 border border-slate-300 rounded px-1 py-1 text-center font-mono focus:ring-2 focus:ring-sky-400 outline-none transition">
-                            </div>
-                        </div>
-                        <div class="h-64 relative w-full">
-                            <canvas id="relativeChart"></canvas>
-                        </div>
-                        <p id="analysisConclusion" class="text-sm mt-4 text-slate-600 bg-slate-50 p-3 rounded border border-slate-100 border-l-4 border-l-sky-500">
-                        Pilih titik di peta untuk melihat simulasi persilangan antara laju amblesan daratan dengan naiknya MSL.
+                    <p id="analysisConclusion" class="text-[11px] mt-4 text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 border-l-2 border-l-sky-500">
+                        Pilih titik di peta untuk melihat simulasi.
                     </p>
                 </div>
 
-                <!-- Gemini AI Panel -->
-                <div class="bg-indigo-50 p-6 rounded-xl shadow-sm border border-indigo-200">
-                    <div class="mb-3">
-                        <h3 class="font-bold text-indigo-900 flex items-center">
-                            ✨ Dinamika Wilayah & Konteks Berita (AI)
-                        </h3>
-                        <p class="text-[10px] text-indigo-500 mt-1">Dianalisis secara otomatis berdasarkan koordinat titik peta.</p>
-                    </div>
-                    <div id="aiResponseContainer" class="text-sm text-indigo-800 leading-relaxed bg-white p-4 rounded-lg border border-indigo-100 min-h-[80px] prose prose-indigo max-w-none">
-                        <span class="text-slate-400 italic">Silakan klik suatu titik koordinat di peta. AI akan otomatis menjelaskan dinamika area tersebut dan mengaitkannya dengan berita/isu pesisir setempat.</span>
+                <!-- Laporan Gemini AI -->
+                <div class="bg-white p-5 rounded-xl shadow border border-sky-200 relative overflow-hidden flex flex-col">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 to-indigo-500"></div>
+                    <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-sky-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path></svg>
+                        Dinamika Area & Isu Lokal (Gemini AI)
+                    </h3>
+                    
+                    <!-- Container untuk output Markdown AI -->
+                    <div id="aiResponseContainer" class="ai-content text-sm text-slate-700 bg-slate-50 p-4 rounded-lg border border-slate-100 flex-1 overflow-y-auto">
+                        <div class="flex flex-col items-center justify-center h-full text-slate-400 italic text-center space-y-2">
+                            <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p>Klik titik mana saja di peta.<br>Kecerdasan Buatan akan otomatis menyusun laporan dinamika alam dan mengutip isu/berita nyata di wilayah tersebut.</p>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- ================= LOGIKA JAVASCRIPT ================= -->
+    <!-- ================= LOGIKA JAVASCRIPT ================= -->
     <script>
         let map;
         let activeMarker;
-        let currentData = { lat: null, lon: null, elevation: 0, subRate: 0, slrRate: 4.5, inundationYear: null };
+        let currentData = { lat: null, lon: null, locationName: "", elevation: 0, subRate: 0, slrRate: 4.5, inundationYear: null };
         let timeSeriesChart;
         const BASE_YEAR = 2026; 
+        const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=600&auto=format&fit=crop'; // Gambar laut estetik
 
+        // 1. INISIALISASI PETA
         function initMap() {
             if(!map) {
                 map = L.map('map').setView([-2.0, 118.0], 5); 
@@ -186,19 +186,24 @@
                     document.getElementById('authLon').innerText = lon;
                     currentData.lat = lat; currentData.lon = lon;
 
-                    document.getElementById('copernicusStatus').innerHTML = '';
+                    // Loading UI
+                    const aiContainer = document.getElementById('aiResponseContainer');
+                    aiContainer.innerHTML = `<div class="flex items-center space-x-3 text-sky-600 h-full justify-center"><div class="loader ease-linear rounded-full border-4 border-t-4 border-sky-300 h-6 w-6"></div><span class="font-semibold animate-pulse">Menghubungkan ke Gemini AI...</span></div>`;
                     
-                    // Set Loading State AI Otomatis
-                    document.getElementById('aiResponseContainer').innerHTML = `<div class="flex items-center space-x-2 text-indigo-500"><div class="loader ease-linear rounded-full border-4 border-t-4 border-indigo-200 h-5 w-5"></div><span>AI sedang membaca dinamika lokasi dan mencari konteks berita terkait...</span></div>`;
+                    // Reset Gambar ke Loading/Fallback
+                    document.getElementById('locationImageBanner').style.backgroundImage = `url('${FALLBACK_IMAGE}')`;
 
                     document.getElementById('mapLoading').classList.remove('hidden');
+                    
                     await executeSpatialAnalysis(lat, lon);
+                    
                     document.getElementById('mapLoading').classList.add('hidden');
                 });
             }
             setTimeout(() => { map.invalidateSize(); }, 500);
         }
 
+        // 2. FETCH ELEVASI
         async function fetchRealElevation(lat, lon) {
             try {
                 const res = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
@@ -206,95 +211,83 @@
                 let elev = data.elevation[0];
                 if (elev === null || elev === undefined) elev = 0; 
                 return elev;
-            } catch (err) {
-                return 0; 
+            } catch (err) { return 0; }
+        }
+
+        // 3. FETCH NAMA TEMPAT 
+        async function fetchLocationName(lat, lon) {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10`);
+                if (!res.ok) throw new Error("API Limit");
+                const data = await res.json();
+                if(data.error) return "Perairan Lepas / Zona Laut";
+                
+                let placeName = data.name || data.address.county || data.address.city || data.address.state || "Wilayah Pesisir";
+                let region = data.address.state ? `, ${data.address.state}` : '';
+                return `${placeName}${region}`;
+            } catch (err) { return "Wilayah Tidak Teridentifikasi"; }
+        }
+
+        // 4. FETCH GAMBAR WIKIPEDIA OTOMATIS BERDASARKAN NAMA
+        async function fetchLocationImage(locationName) {
+            // Ambil kata pertama saja (sebelum koma) agar pencarian di Wiki lebih akurat
+            let query = locationName.split(',')[0].trim();
+            if(query === "Perairan Lepas / Zona Laut" || query.includes("Wilayah")) return null;
+
+            try {
+                // Cari artikel yang cocok dengan nama tempat
+                const searchRes = await fetch(`https://id.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`);
+                const searchData = await searchRes.json();
+                
+                if (searchData.query.search.length > 0) {
+                    const title = searchData.query.search[0].title;
+                    // Ambil thumbnail foto utama dari artikel tersebut
+                    const imageRes = await fetch(`https://id.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=pageimages&format=json&pithumbsize=600&origin=*`);
+                    const imageData = await imageRes.json();
+                    const pages = imageData.query.pages;
+                    const pageId = Object.keys(pages)[0];
+                    
+                    if (pages[pageId].thumbnail) {
+                        return pages[pageId].thumbnail.source; // URL Gambar
+                    }
+                }
+                return null;
+            } catch (e) {
+                return null;
             }
         }
 
+        // 5. FETCH DINAMIKA LAUT
         async function fetchOceanDynamics(lat, lon) {
             const container = document.getElementById('liveOceanData');
             try {
-                const res = await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&current=wave_height,ocean_current_velocity,surge_height`);
-                if (!res.ok) throw new Error("Inland / No Data");
+                const res = await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&current=wave_height,surge_height`);
+                if (!res.ok) throw new Error("Inland");
                 const data = await res.json();
-                
                 const wave = data.current.wave_height || 0;
                 const surge = data.current.surge_height || 0; 
                 
                 container.innerHTML = `
-                    <div class="flex justify-between items-center py-1">
-                        <span class="text-sm text-slate-600">Sig. Wave Height</span>
-                        <span class="font-mono font-bold">${wave.toFixed(2)} m</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1">
-                        <span class="text-sm text-slate-600">Storm Surge Anomaly</span>
-                        <span class="font-mono font-bold text-sky-600">${surge.toFixed(2)} m</span>
-                    </div>
+                    <span class="text-xs text-slate-400">Gelombang / Surge</span>
+                    <span class="font-mono text-sm font-bold text-sky-300">${wave.toFixed(1)}m / ${surge.toFixed(1)}m</span>
                 `;
             } catch (e) {
-                container.innerHTML = `<p class="text-xs text-orange-500">Kawasan terdeteksi sebagai daratan jauh (inland) atau data satelit perairan tidak tersedia di titik ini.</p>`;
+                container.innerHTML = `
+                    <span class="text-xs text-slate-400">Gelombang / Surge</span>
+                    <span class="font-mono text-[10px] text-orange-300">Data satelit laut tidak tersedia (Inland)</span>
+                `;
             }
-        }
-
-        async function triggerCopernicusFetch() {
-            const user = document.getElementById('cmemsUser').value;
-            const pass = document.getElementById('cmemsPass').value;
-            const lat = currentData.lat;
-            const lon = currentData.lon;
-            const btn = document.getElementById('copernicusBtn');
-            const statusEl = document.getElementById('copernicusStatus');
-
-            if (!lat || !lon) {
-                statusEl.innerHTML = '<span class="text-orange-400">⚠️ Pilih titik di peta terlebih dahulu!</span>';
-                return;
-            }
-            if (!user || !pass) {
-                statusEl.innerHTML = '<span class="text-orange-400">⚠️ Masukkan Username & Password CMEMS!</span>';
-                return;
-            }
-
-            btn.innerHTML = `<svg class="animate-spin h-4 w-4 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
-            btn.disabled = true;
-            btn.classList.add('opacity-70', 'cursor-not-allowed');
-            statusEl.innerHTML = '<span class="text-sky-300 animate-pulse">Menghubungkan ke server satelit...</span>';
-
-            try {
-                const token = btoa(`${user}:${pass}`);
-                const cmemsUrl = `https://wmts.marine.copernicus.eu/teroWmts/GLOBAL_ANALYSISFORECAST_PHY_001_024/cmems_mod_glo_phy-ssh_anfc_0.083deg_P1D-m?service=WMS&request=GetFeatureInfo&lat=${lat}&lon=${lon}`;
-
-                const response = await fetch(cmemsUrl, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Basic ${token}` }
-                });
-
-                if (!response.ok) throw new Error("HTTP " + response.status);
-                
-                const data = await response.json();
-                currentData.slrRate = data.sla_trend || 4.5;
-
-            } catch (error) {
-                await new Promise(resolve => setTimeout(resolve, 1500)); 
-                let dynamicSLA = 5.5 - (Math.abs(lat) * 0.05); 
-                dynamicSLA = dynamicSLA + (Math.random() * 0.8 - 0.4); 
-                currentData.slrRate = Math.max(2.5, dynamicSLA);
-            }
-
-            updateProyeksiVisuals();
-            
-            statusEl.innerHTML = `<span class="text-emerald-400">✅ Sukses! Tren SLA Titik ini: <b>${currentData.slrRate.toFixed(2)} mm/yr</b></span>`;
-            btn.innerText = "Tarik Data Raster Titik Ini";
-            btn.disabled = false;
-            btn.classList.remove('opacity-70', 'cursor-not-allowed');
         }
 
         function getEstimatedSubsidence(lat, lon) {
-            if (lat > -7.5 && lat < -5.5 && lon > 105.5 && lon < 114.5) return 40 + Math.random() * 40; 
+            if (lat > -7.5 && lat < -5.5 && lon > 105.5 && lon < 114.5) return 30 + Math.random() * 50; 
             if (lat > -4.5 && lat < 4.0 && lon > 97.0 && lon < 105.5) return 5 + Math.random() * 10; 
             return Math.random() * 2; 
         }
 
+        // 6. UPDATE GRAFIK 
         function updateProyeksiVisuals() {
-            if (currentData.lat === null) return; 
+            if (currentData.lat === null) return;
 
             const elev = currentData.elevation;
             const subRate = currentData.subRate;
@@ -304,17 +297,10 @@
             document.getElementById('subRateDisplay').innerText = subRate.toFixed(1);
             document.getElementById('slrRateDisplay').innerText = slrRate.toFixed(1);
 
-            const startYearInput = document.getElementById('startYear');
-            const endYearInput = document.getElementById('endYear');
-            let startYear = parseInt(startYearInput.value) || 2026;
-            let endYear = parseInt(endYearInput.value) || 2100;
+            let startYear = parseInt(document.getElementById('startYear').value) || 2026;
+            let endYear = parseInt(document.getElementById('endYear').value) || 2100;
 
-            if (startYear >= endYear) {
-                endYear = startYear + 10;
-                endYearInput.value = endYear;
-            }
-
-            document.getElementById('chartTitle').innerText = `Proyeksi Elevasi Daratan vs MSL (${startYear} - ${endYear})`;
+            if (startYear >= endYear) { endYear = startYear + 10; document.getElementById('endYear').value = endYear; }
 
             const labels = [];
             const landElevData = []; 
@@ -323,7 +309,6 @@
 
             for (let year = startYear; year <= endYear; year++) {
                 labels.push(year.toString());
-
                 let yearsElapsedFromBase = year - BASE_YEAR;
                 
                 let projectedLandCm = (elev * 100) - ((subRate / 10) * yearsElapsedFromBase);
@@ -336,106 +321,42 @@
                     inundationYear = year;
                 }
             }
-
-            currentData.inundationYear = inundationYear; // Simpan untuk AI Gemini
+            currentData.inundationYear = inundationYear;
 
             const conclusionEl = document.getElementById('analysisConclusion');
-            if (elev <= 0) {
-                conclusionEl.innerHTML = `⚠️ <b class="text-orange-600">Elevasi di bawah nol.</b> Titik ini merupakan perairan laut atau daratan yang sudah tergenang di bawah Mean Sea Level (MSL).`;
-            } else if (inundationYear && inundationYear <= endYear) {
-                conclusionEl.innerHTML = `🚨 <b class="text-red-600">Peringatan Kritis:</b> Dengan laju amblesan ${subRate.toFixed(1)} mm/thn dan SLR global sebesar ${slrRate.toFixed(1)} mm/thn, titik ini diproyeksikan akan tenggelam permanen pada tahun <b>${inundationYear}</b> (MSL melampaui elevasi daratan).`;
-            } else if (inundationYear && inundationYear > endYear) {
-                conclusionEl.innerHTML = `⚠️ <b class="text-yellow-600">Rawan (Jangka Panjang):</b> Titik ini akan aman dalam rentang grafik yang Anda pilih, tetapi diproyeksikan tenggelam di tahun <b>${inundationYear}</b>.`;
-            } else {
-                conclusionEl.innerHTML = `✅ <b class="text-emerald-600">Relatif Aman:</b> Titik ini memiliki elevasi yang cukup tinggi (${elev.toFixed(1)} MDPL). Meskipun terjadi SLR, daratan tidak akan tenggelam secara permanen hingga tahun ${endYear} berdasarkan laju saat ini.`;
-            }
+            if (elev <= 0) conclusionEl.innerHTML = `⚠️ <b class="text-orange-600">Elevasi Negatif.</b> Titik laut / daratan terendam MSL.`;
+            else if (inundationYear && inundationYear <= endYear) conclusionEl.innerHTML = `🚨 <b class="text-red-600">Kritis:</b> Daratan diproyeksikan tenggelam permanen pada tahun <b>${inundationYear}</b>.`;
+            else if (inundationYear && inundationYear > endYear) conclusionEl.innerHTML = `⚠️ <b class="text-yellow-600">Rawan:</b> Aman di rentang grafik ini, namun berpotensi tenggelam di tahun ${inundationYear}.`;
+            else conclusionEl.innerHTML = `✅ <b class="text-emerald-600">Relatif Aman:</b> MSL tidak melampaui elevasi daratan hingga tahun ${endYear}.`;
 
             if (timeSeriesChart) timeSeriesChart.destroy();
-
             const ctx = document.getElementById('relativeChart').getContext('2d');
             timeSeriesChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
-                        {
-                            label: 'Elevasi Daratan (cm)',
-                            data: landElevData,
-                            borderColor: '#f97316',
-                            backgroundColor: 'rgba(249, 115, 22, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            pointRadius: 0
-                        },
-                        {
-                            label: 'Mean Sea Level (cm)',
-                            data: seaLevelData,
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                            borderWidth: 2,
-                            fill: true,
-                            pointRadius: 0
-                        }
+                        { label: 'Elevasi Daratan (cm)', data: landElevData, borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.1)', borderWidth: 2, fill: true, pointRadius: 0 },
+                        { label: 'Mean Sea Level (cm)', data: seaLevelData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', borderWidth: 2, fill: true, pointRadius: 0 }
                     ]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    scales: {
-                        y: { title: { display: true, text: 'Sentimeter terhadap Datum' } },
-                        x: { grid: { display: false } }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': ' + context.parsed.y + ' cm';
-                                }
-                            }
-                        }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { title: { display: true, text: 'Sentimeter (cm)' } }, x: { grid: { display: false } } } }
             });
         }
 
-        // ==========================================
-        // FITUR AI GEMINI - DINAMIKA & KONTEKS BERITA
-        // ==========================================
-        async function fetchLocationName(lat, lon) {
-            try {
-                // Membaca nama daerah dari titik koordinat (Reverse Geocoding)
-                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10`);
-                if (!res.ok) return "Area Pesisir/Laut";
-                const data = await res.json();
-                if(data.error) return "Perairan Lepas";
-                return data.name || data.address?.county || data.address?.city || data.address?.state || "Wilayah Pesisir";
-            } catch (err) {
-                return "Zona Pesisir Tidak Diketahui";
-            }
-        }
-
+        // 7. GEMINI AI
         async function fetchGeminiWithBackoff(promptText, retries = 5) {
-            const apiKey = ""; // Kunci API disediakan otomatis oleh sistem
+            const apiKey = ""; 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             
             const payload = {
                 contents: [{ parts: [{ text: promptText }] }],
-                systemInstruction: { 
-                    parts: [{ 
-                        text: "Anda adalah ahli oseanografi dan pengamat berita lingkungan pesisir. Tugas Anda menganalisis kondisi suatu lokasi. Jawab dalam bahasa Indonesia dengan format Markdown. Tidak perlu pengantar, langsung berikan poin-poin penjelasan dinamika dan berita/kejadian nyatanya." 
-                    }] 
-                }
+                systemInstruction: { parts: [{ text: "Anda adalah analis geografi, berita lingkungan, dan oseanografi Indonesia. Jelaskan dinamika pesisir di lokasi yang diminta secara ringkas dan lugas. Sebutkan kejadian nyata, isu lokal, atau berita yang sering terjadi di wilayah tersebut (misal: banjir rob, amblesan tanah, intrusi air laut, proyek Giant Sea Wall, dsb). Jawab dalam Bahasa Indonesia menggunakan format Markdown. Buat 2-3 paragraf saja yang padat informasi." }] }
             };
 
             for (let i = 0; i < retries; i++) {
                 try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    
+                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                     if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
                     const result = await response.json();
                     return result.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -446,58 +367,64 @@
             }
         }
 
-        async function generateGeminiReportAuto() {
-            if (currentData.lat === null) return;
-            const container = document.getElementById('aiResponseContainer');
+        async function triggerGeminiAI() {
+            const aiContainer = document.getElementById('aiResponseContainer');
+            let inundationStatus = currentData.inundationYear ? `diprediksi tenggelam permanen pada tahun ${currentData.inundationYear}` : "cenderung aman dari tenggelam total abad ini";
+            if (currentData.elevation <= 0) inundationStatus = "sudah berada di bawah nol elevasi (perairan).";
+
+            const prompt = `Lokasi spesifik: ${currentData.locationName} (Lat: ${currentData.lat}, Lon: ${currentData.lon}). 
+Elevasi: ${currentData.elevation.toFixed(2)} meter dpl.
+Laju Penurunan Tanah: ${currentData.subRate.toFixed(2)} mm/tahun.
+Berdasarkan metrik tersebut, wilayah ini ${inundationStatus}.
+
+Jelaskan mengapa dinamika alam di daerah ini bisa terjadi seperti itu. Ceritakan kondisi sosial-lingkungan atau sebutkan berita/isu nyata terkini terkait bencana lingkungan atau upaya mitigasi di daerah ini.`;
 
             try {
-                // Ambil nama wilayah agar Gemini tahu berita apa yang harus dicari
-                const locName = await fetchLocationName(currentData.lat, currentData.lon);
-
-                const prompt = `Titik Koordinat: (Latitude: ${currentData.lat}, Longitude: ${currentData.lon}). 
-Lokasi Terdeteksi: ${locName}. 
-Elevasi tanah: ${currentData.elevation.toFixed(2)} mdpl. 
-Laju amblesan tanah: ${currentData.subRate.toFixed(2)} mm/tahun. 
-Laju naiknya muka air laut: ${currentData.slrRate.toFixed(2)} mm/tahun.
-
-Instruksi:
-1. Dinamika Lokasi: Jelaskan secara singkat mengapa wilayah ini rentan/aman berdasarkan angka elevasi dan amblesannya.
-2. Konteks Berita/Fakta: Sebutkan kejadian nyata, isu lingkungan, atau berita yang sering terjadi di sekitar wilayah ${locName} ini (misal: kasus rob spesifik, reklamasi, krisis air tanah, banjir, atau abrasi pantai). Berikan konteks nyata.`;
-
                 const aiTextResponse = await fetchGeminiWithBackoff(prompt);
-                container.innerHTML = marked.parse(aiTextResponse);
+                aiContainer.innerHTML = marked.parse(aiTextResponse);
             } catch (error) {
-                container.innerHTML = `<p class="text-red-500 font-semibold">Gagal memuat analisis AI.</p>`;
+                aiContainer.innerHTML = `<div class="text-red-500 font-semibold flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Gagal memuat respon AI. Pastikan lingkungan aplikasi mengizinkan pemanggilan Gemini API.</div>`;
             }
         }
 
-        // Listener untuk Input Tahun
+        // 8. ORKESTRASI UTAMA 
+        async function executeSpatialAnalysis(lat, lon) {
+            currentData.slrRate = 4.5; 
+            
+            // Ekstrak Nama
+            const locName = await fetchLocationName(lat, lon);
+            currentData.locationName = locName;
+            document.getElementById('locationName').innerText = locName;
+
+            // Cari Gambar di Wikipedia!
+            const imgUrl = await fetchLocationImage(locName);
+            if(imgUrl) {
+                document.getElementById('locationImageBanner').style.backgroundImage = `url('${imgUrl}')`;
+            } else {
+                document.getElementById('locationImageBanner').style.backgroundImage = `url('${FALLBACK_IMAGE}')`;
+            }
+
+            // Data Teknis
+            const elev = await fetchRealElevation(lat, lon);
+            const subRate = getEstimatedSubsidence(lat, lon);
+            currentData.elevation = elev;
+            currentData.subRate = subRate;
+
+            await fetchOceanDynamics(lat, lon);
+            updateProyeksiVisuals();
+            await triggerGeminiAI();
+        }
+
         document.getElementById('startYear').addEventListener('change', updateProyeksiVisuals);
         document.getElementById('endYear').addEventListener('change', updateProyeksiVisuals);
 
-        async function executeSpatialAnalysis(lat, lon) {
-            currentData.slrRate = 4.5; 
-            const elev = await fetchRealElevation(lat, lon);
-            const subRate = getEstimatedSubsidence(lat, lon);
-            
-            currentData.elevation = elev;
-            currentData.subRate = subRate;
-            
-            await fetchOceanDynamics(lat, lon);
-            
-            updateProyeksiVisuals();
-            
-            // Panggil AI secara otomatis di akhir proses ekstraksi
-            generateGeminiReportAuto();
-        }
-
         document.getElementById('exploreBtn').addEventListener('click', () => {
             document.getElementById('landing-page').classList.add('hidden-page');
-            setTimeout(() => { document.getElementById('dashboard-page').classList.remove('hidden-page'); initMap(); }, 600);
+            setTimeout(() => { document.getElementById('dashboard-page').classList.remove('hidden-page'); initMap(); }, 500);
         });
         document.getElementById('backBtn').addEventListener('click', () => {
             document.getElementById('dashboard-page').classList.add('hidden-page');
-            setTimeout(() => { document.getElementById('landing-page').classList.remove('hidden-page'); }, 600);
+            setTimeout(() => { document.getElementById('landing-page').classList.remove('hidden-page'); }, 500);
         });
 
     </script>
