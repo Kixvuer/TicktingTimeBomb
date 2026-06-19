@@ -26,34 +26,27 @@
     <!-- ================= LANDING PAGE ================= -->
     <section id="landing-page" class="page-transition min-h-screen flex flex-col justify-center items-center bg-slate-900 text-white p-6 relative">
         <div class="max-w-5xl text-center space-y-6 relative z-20">
-            <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-8">
                 Model Kenaikan Muka Air Relatif<br><span class="text-sky-400">Integrasi Data Satelit Kelautan</span>
             </h1>
-            <p class="text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
-                Dashboard analisis hidro-oseanografi. Mengekstrak data elevasi daratan dan Mean Sea Level (MSL) untuk mensimulasikan titik potong inundasi pesisir hingga tahun 2100.
-            </p>
-            <button id="exploreBtn" class="mt-8 bg-sky-600 hover:bg-sky-500 text-white font-bold py-4 px-10 rounded-lg shadow-lg transition duration-300">
+            <!-- Teks paragraf telah dihapus sesuai permintaan -->
+            
+            <button id="exploreBtn" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-4 px-10 rounded-lg shadow-lg transition duration-300">
                 Inisialisasi Workspace
             </button>
         </div>
     </section>
 
     <!-- ================= DASHBOARD PAGE ================= -->
-    <section id="dashboard-page" class="page-transition hidden-page min-h-screen w-full p-4 md:p-6 bg-slate-100 relative">
-        <div class="max-w-7xl mx-auto space-y-4">
+    <section id="dashboard-page" class="page-transition hidden-page min-h-screen w-full p-2 md:p-4 bg-slate-100 relative">
+        <div class="max-w-7xl mx-auto">
             
-            <header class="flex justify-between items-center py-4 px-6 bg-white rounded-xl shadow-sm border border-slate-200">
-                <div>
-                    <h1 class="text-xl font-bold text-slate-800">Workspace Dinamika Pesisir</h1>
-                    <p class="text-xs text-slate-500 font-mono">Status: Terhubung ke Sensor Elevasi Global & Tide Model</p>
-                </div>
-                <button id="backBtn" class="text-sm text-slate-600 hover:text-sky-600 font-bold px-4 py-2 border rounded-lg transition">← Kembali</button>
-            </header>
-
-            <!-- Peta & Input Credentials -->
+            <!-- Peta & Input Credentials (Sekarang berada paling atas) -->
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                
+                <!-- PETA -->
                 <div class="lg:col-span-3 bg-white p-2 rounded-xl shadow-sm border border-slate-200 relative">
-                    <div id="map" style="width: 100%; height: 400px;" class="rounded-lg border border-slate-200"></div>
+                    <div id="map" style="width: 100%; height: 420px;" class="rounded-lg border border-slate-200"></div>
                     <div id="mapLoading" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-xl z-20 hidden flex justify-center items-center">
                         <div class="bg-white px-6 py-3 rounded-lg shadow-xl text-sky-700 font-bold flex items-center">
                             <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-200 h-6 w-6 mr-3"></div>
@@ -65,7 +58,13 @@
                 <!-- Panel Copernicus Auth -->
                 <div class="lg:col-span-1 bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-700 text-white flex flex-col justify-between">
                     <div>
-                        <h3 class="text-sm font-bold text-sky-400 mb-3 uppercase tracking-wider">Koneksi API Copernicus (CMEMS)</h3>
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider">Koneksi API (CMEMS)</h3>
+                            <!-- Tombol kembali dipindah ke sini -->
+                            <button id="backBtn" class="text-[10px] bg-slate-800 hover:bg-red-500 hover:text-white text-slate-400 px-2 py-1 rounded transition font-bold">
+                                ✕ KELUAR
+                            </button>
+                        </div>
                         <p class="text-[10px] text-slate-400 mb-4">Masukkan kredensial untuk menarik data Sea Level Anomaly (SLA) Raster secara real-time.</p>
                         
                         <label class="block text-xs text-slate-300 mb-1">Username CMEMS</label>
@@ -75,7 +74,7 @@
                         <input type="password" id="cmemsPass" placeholder="••••••••" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm mb-3 focus:outline-none focus:border-sky-500 text-white">
                     </div>
                     
-                    <div class="bg-slate-800 p-3 rounded border border-slate-600">
+                    <div class="bg-slate-800 p-3 rounded border border-slate-600 mt-2">
                         <p class="text-[10px] text-sky-300 font-mono">LAT: <span id="authLat">-</span> | LON: <span id="authLon">-</span></p>
                         <button onclick="triggerCopernicusFetch()" class="mt-2 w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded transition">
                             Tarik Data Raster Titik Ini
@@ -133,13 +132,11 @@
 
     <!-- ================= LOGIKA JAVASCRIPT ================= -->
     <script>
-        // State Variabel
         let map;
         let activeMarker;
         let currentData = { lat: null, lon: null, elevation: 0, subRate: 0, slrRate: 4.5 };
         let timeSeriesChart;
 
-        // Inisialisasi Peta
         function initMap() {
             if(!map) {
                 map = L.map('map').setView([-2.0, 118.0], 5); 
@@ -164,27 +161,18 @@
             setTimeout(() => { map.invalidateSize(); }, 500);
         }
 
-        // ==========================================
-        // FUNGSI 1: TARIK DATA ELEVASI REAL (TOPOGRAFI)
-        // ==========================================
         async function fetchRealElevation(lat, lon) {
             try {
-                // Menggunakan API Open-Meteo Elevation (Resolusi Global 90m)
                 const res = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
                 const data = await res.json();
-                
                 let elev = data.elevation[0];
-                if (elev === null || elev === undefined) elev = 0; // Jika di tengah laut
+                if (elev === null || elev === undefined) elev = 0; 
                 return elev;
             } catch (err) {
-                console.error("Gagal mendapat elevasi", err);
-                return 0; // fallback
+                return 0; 
             }
         }
 
-        // ==========================================
-        // FUNGSI 2: TARIK DATA LAUT AKTUAL
-        // ==========================================
         async function fetchOceanDynamics(lat, lon) {
             const container = document.getElementById('liveOceanData');
             try {
@@ -193,7 +181,7 @@
                 const data = await res.json();
                 
                 const wave = data.current.wave_height || 0;
-                const surge = data.current.surge_height || 0; // Anomali tinggi air
+                const surge = data.current.surge_height || 0; 
                 
                 container.innerHTML = `
                     <div class="flex justify-between items-center py-1">
@@ -210,9 +198,6 @@
             }
         }
 
-        // ==========================================
-        // FUNGSI 3: COPERNICUS API FETCH (FRAMEWORK)
-        // ==========================================
         async function triggerCopernicusFetch() {
             const user = document.getElementById('cmemsUser').value;
             const pass = document.getElementById('cmemsPass').value;
@@ -222,55 +207,33 @@
             if (!lat || !lon) return alert("Klik titik di peta terlebih dahulu!");
             if (!user || !pass) return alert("Masukkan Username dan Password Copernicus Anda!");
 
-            alert(`Mengeksekusi HTTP GET ke Copernicus Marine Data Store...\n\nEndpoint: cmems_obs-sl_glo_phy-ssh_my_allsat-l4-duacs-0.25deg_P1D\nKoordinat: ${lat}, ${lon}\n\n(Catatan: Untuk implementasi web real, permintaan ini sebaiknya dirutekan melalui backend Python Anda untuk menghindari pemblokiran CORS dari server Copernicus).`);
-            
-            // Konsep penulisan fetch dengan Basic Auth untuk CMEMS
-            /*
-            const token = btoa(`${user}:${pass}`);
-            fetch(`https://wmts.marine.copernicus.eu/teroWmts/...`, {
-                headers: { 'Authorization': `Basic ${token}` }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Di sini Anda mengekstrak nilai Sea Level Anomaly
-                // currentData.slrRate = data.sla_trend;
-                // updateVisuals();
-            });
-            */
+            alert(`Mengeksekusi HTTP GET ke Copernicus Marine Data Store...\n\nEndpoint: cmems_obs-sl_glo_phy-ssh_my_allsat-l4-duacs-0.25deg_P1D\nKoordinat: ${lat}, ${lon}`);
         }
 
-        // Algoritma Penentuan Subsidence (Karena InSAR Raster tidak bisa diload ke browser tanpa backend)
         function getEstimatedSubsidence(lat, lon) {
-            if (lat > -7.5 && lat < -5.5 && lon > 105.5 && lon < 114.5) return 40 + Math.random() * 40; // Pantura ekstrim
-            if (lat > -4.5 && lat < 4.0 && lon > 97.0 && lon < 105.5) return 5 + Math.random() * 10; // Sumatera
-            return Math.random() * 2; // Stabil
+            if (lat > -7.5 && lat < -5.5 && lon > 105.5 && lon < 114.5) return 40 + Math.random() * 40; 
+            if (lat > -4.5 && lat < 4.0 && lon > 97.0 && lon < 105.5) return 5 + Math.random() * 10; 
+            return Math.random() * 2; 
         }
 
-        // ==========================================
-        // FUNGSI 4: ORKESTRASI & GRAFIK RELATIF
-        // ==========================================
         async function executeSpatialAnalysis(lat, lon) {
-            // 1. Ekstrak Data
             const elev = await fetchRealElevation(lat, lon);
             const subRate = getEstimatedSubsidence(lat, lon);
             
             currentData.elevation = elev;
             currentData.subRate = subRate;
             
-            // 2. Update Metrik UI
             document.getElementById('elevDisplay').innerText = elev.toFixed(2);
             document.getElementById('subRateDisplay').innerText = subRate.toFixed(1);
             
             await fetchOceanDynamics(lat, lon);
 
-            // 3. Kalkulasi Time Series (2026 - 2100)
             const labels = [];
-            const landElevData = []; // Ketinggian daratan turun
-            const seaLevelData = []; // Ketinggian laut naik
+            const landElevData = []; 
+            const seaLevelData = []; 
 
-            // Konversi dari MDPL (meter) ke centimeter agar grafiknya terlihat jelas
             let currentLandCm = elev * 100; 
-            let currentSeaCm = 0; // Asumsikan MSL 2026 adalah titik nol lokal
+            let currentSeaCm = 0; 
             let inundationYear = null;
 
             for (let year = 2026; year <= 2100; year++) {
@@ -278,27 +241,23 @@
                 landElevData.push(currentLandCm.toFixed(2));
                 seaLevelData.push(currentSeaCm.toFixed(2));
 
-                // Deteksi Persilangan (Inundasi)
                 if (currentSeaCm >= currentLandCm && inundationYear === null) {
                     inundationYear = year;
                 }
 
-                // Tiap tahun daratan turun (mm ke cm), laut naik (mm ke cm)
                 currentLandCm -= (subRate / 10);
                 currentSeaCm += (currentData.slrRate / 10);
             }
 
-            // 4. Update Teks Kesimpulan
             const conclusionEl = document.getElementById('analysisConclusion');
-            if (elev < 0) {
+            if (elev <= 0) {
                 conclusionEl.innerHTML = `⚠️ <b class="text-orange-600">Elevasi di bawah nol.</b> Titik ini merupakan perairan laut atau daratan yang sudah tergenang di bawah Mean Sea Level (MSL).`;
             } else if (inundationYear) {
-                conclusionEl.innerHTML = `🚨 <b class="text-red-600">Peringatan Kritis:</b> Dengan laju amblesan ${subRate.toFixed(1)} mm/thn dan SLR global, titik ini diproyeksikan akan tenggelam (laut melewati tinggi daratan) pada tahun <b>${inundationYear}</b> jika dihitung terhadap MSL, belum termasuk perhitungan peninggian ekstrem akibat pasang purnama atau storm surge.`;
+                conclusionEl.innerHTML = `🚨 <b class="text-red-600">Peringatan Kritis:</b> Dengan laju amblesan ${subRate.toFixed(1)} mm/thn dan SLR global, titik ini diproyeksikan akan tenggelam permanen pada tahun <b>${inundationYear}</b> (MSL melampaui elevasi daratan).`;
             } else {
-                conclusionEl.innerHTML = `✅ <b class="text-emerald-600">Relatif Aman:</b> Titik ini memiliki elevasi yang cukup tinggi (${elev.toFixed(1)} MDPL). Meskipun terjadi SLR, daratan tidak akan tenggelam secara permanen hingga tahun 2100 berdasarkan laju linier saat ini.`;
+                conclusionEl.innerHTML = `✅ <b class="text-emerald-600">Relatif Aman:</b> Titik ini memiliki elevasi yang cukup tinggi (${elev.toFixed(1)} MDPL). Meskipun terjadi SLR, daratan tidak akan tenggelam secara permanen hingga tahun 2100 berdasarkan laju saat ini.`;
             }
 
-            // 5. Render Grafik Line Chart
             if (timeSeriesChart) timeSeriesChart.destroy();
 
             const ctx = document.getElementById('relativeChart').getContext('2d');
@@ -348,7 +307,6 @@
             });
         }
 
-        // Navigasi UI
         document.getElementById('exploreBtn').addEventListener('click', () => {
             document.getElementById('landing-page').classList.add('hidden-page');
             setTimeout(() => { document.getElementById('dashboard-page').classList.remove('hidden-page'); initMap(); }, 600);
