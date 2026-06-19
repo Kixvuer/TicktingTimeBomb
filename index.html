@@ -38,10 +38,11 @@
     <!-- ================= LANDING PAGE ================= -->
     <section id="landing-page" class="page-transition min-h-screen flex flex-col justify-center items-center bg-slate-900 text-white p-6 relative">
         <div class="max-w-5xl text-center space-y-6 relative z-20">
-            <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-8">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-4">
                 Dashboard Analisis Pesisir<br><span class="text-sky-400">Terintegrasi AI & Data Satelit</span>
             </h1>
             <p class="text-slate-400 max-w-2xl mx-auto mb-8">Platform simulasi dampak kenaikan muka air laut dan amblesan tanah, dilengkapi asisten kecerdasan buatan (Gemini) untuk menganalisis isu lokal secara real-time.</p>
+            
             <button id="exploreBtn" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-4 px-10 rounded-lg shadow-lg transition duration-300">
                 Buka Peta Interaktif
             </button>
@@ -54,9 +55,14 @@
         <!-- Navbar Compact -->
         <div class="w-full bg-slate-900 text-white flex justify-between items-center px-4 py-3 shadow-md z-50 relative">
             <span class="font-bold text-sm md:text-base tracking-wide text-sky-400">🛰️ Spatial Oceanography System</span>
-            <button id="backBtn" class="text-[10px] font-bold bg-slate-800 text-slate-300 hover:text-white hover:bg-red-600 px-3 py-1.5 rounded transition">
-                ✕ KELUAR
-            </button>
+            <div class="flex items-center gap-3">
+                <span class="hidden md:inline-flex items-center text-xs text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded border border-emerald-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span> AI Aktif
+                </span>
+                <button id="backBtn" class="text-[10px] font-bold bg-slate-800 text-slate-300 hover:text-white hover:bg-red-600 px-3 py-1.5 rounded transition">
+                    ✕ KELUAR
+                </button>
+            </div>
         </div>
 
         <div class="w-full max-w-7xl mx-auto p-3 md:p-6 space-y-4 md:space-y-6">
@@ -167,7 +173,7 @@
         let currentData = { lat: null, lon: null, locationName: "", elevation: 0, subRate: 0, slrRate: 4.5, inundationYear: null };
         let timeSeriesChart;
         const BASE_YEAR = 2026; 
-        const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=600&auto=format&fit=crop'; // Gambar laut estetik
+        const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=600&auto=format&fit=crop'; 
 
         // 1. INISIALISASI PETA
         function initMap() {
@@ -188,7 +194,7 @@
 
                     // Loading UI
                     const aiContainer = document.getElementById('aiResponseContainer');
-                    aiContainer.innerHTML = `<div class="flex items-center space-x-3 text-sky-600 h-full justify-center"><div class="loader ease-linear rounded-full border-4 border-t-4 border-sky-300 h-6 w-6"></div><span class="font-semibold animate-pulse">Menghubungkan ke Gemini AI...</span></div>`;
+                    aiContainer.innerHTML = `<div class="flex items-center space-x-3 text-sky-600 h-full justify-center"><div class="loader ease-linear rounded-full border-4 border-t-4 border-sky-300 h-6 w-6"></div><span class="font-semibold animate-pulse">Menghubungkan ke AI...</span></div>`;
                     
                     // Reset Gambar ke Loading/Fallback
                     document.getElementById('locationImageBanner').style.backgroundImage = `url('${FALLBACK_IMAGE}')`;
@@ -217,7 +223,9 @@
         // 3. FETCH NAMA TEMPAT 
         async function fetchLocationName(lat, lon) {
             try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10`);
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10`, {
+                    headers: { 'Accept-Language': 'id-ID' }
+                });
                 if (!res.ok) throw new Error("API Limit");
                 const data = await res.json();
                 if(data.error) return "Perairan Lepas / Zona Laut";
@@ -230,25 +238,22 @@
 
         // 4. FETCH GAMBAR WIKIPEDIA OTOMATIS BERDASARKAN NAMA
         async function fetchLocationImage(locationName) {
-            // Ambil kata pertama saja (sebelum koma) agar pencarian di Wiki lebih akurat
             let query = locationName.split(',')[0].trim();
             if(query === "Perairan Lepas / Zona Laut" || query.includes("Wilayah")) return null;
 
             try {
-                // Cari artikel yang cocok dengan nama tempat
                 const searchRes = await fetch(`https://id.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`);
                 const searchData = await searchRes.json();
                 
                 if (searchData.query.search.length > 0) {
                     const title = searchData.query.search[0].title;
-                    // Ambil thumbnail foto utama dari artikel tersebut
                     const imageRes = await fetch(`https://id.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=pageimages&format=json&pithumbsize=600&origin=*`);
                     const imageData = await imageRes.json();
                     const pages = imageData.query.pages;
                     const pageId = Object.keys(pages)[0];
                     
                     if (pages[pageId].thumbnail) {
-                        return pages[pageId].thumbnail.source; // URL Gambar
+                        return pages[pageId].thumbnail.source; 
                     }
                 }
                 return null;
@@ -274,7 +279,7 @@
             } catch (e) {
                 container.innerHTML = `
                     <span class="text-xs text-slate-400">Gelombang / Surge</span>
-                    <span class="font-mono text-[10px] text-orange-300">Data satelit laut tidak tersedia (Inland)</span>
+                    <span class="font-mono text-[10px] text-orange-300">Data laut tak tersedia (Inland)</span>
                 `;
             }
         }
@@ -344,20 +349,32 @@
             });
         }
 
-        // 7. GEMINI AI
+        // 7. GEMINI AI (OTOMATIS TANPA PERLU KEY MANUAL DARI USER)
         async function fetchGeminiWithBackoff(promptText, retries = 5) {
-            const apiKey = ""; 
+            const apiKey = ""; // Kunci API disediakan secara otomatis oleh lingkungan aplikasi Canvas
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             
             const payload = {
                 contents: [{ parts: [{ text: promptText }] }],
-                systemInstruction: { parts: [{ text: "Anda adalah analis geografi, berita lingkungan, dan oseanografi Indonesia. Jelaskan dinamika pesisir di lokasi yang diminta secara ringkas dan lugas. Sebutkan kejadian nyata, isu lokal, atau berita yang sering terjadi di wilayah tersebut (misal: banjir rob, amblesan tanah, intrusi air laut, proyek Giant Sea Wall, dsb). Jawab dalam Bahasa Indonesia menggunakan format Markdown. Buat 2-3 paragraf saja yang padat informasi." }] }
+                systemInstruction: { 
+                    parts: [{ 
+                        text: "Anda adalah analis geografi, berita lingkungan, dan oseanografi Indonesia. Jelaskan dinamika pesisir di lokasi yang diminta secara ringkas dan lugas. Sebutkan kejadian nyata, isu lokal, atau berita yang sering terjadi di wilayah tersebut (misal: banjir rob, amblesan tanah, intrusi air laut, proyek Giant Sea Wall, dsb). Jawab dalam Bahasa Indonesia menggunakan format Markdown. Buat 2-3 paragraf saja yang padat informasi, langsung ke poin." 
+                    }] 
+                }
             };
 
             for (let i = 0; i < retries; i++) {
                 try {
-                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.error?.message || `HTTP Error: ${response.status}`);
+                    }
                     const result = await response.json();
                     return result.candidates?.[0]?.content?.parts?.[0]?.text;
                 } catch (error) {
@@ -369,6 +386,7 @@
 
         async function triggerGeminiAI() {
             const aiContainer = document.getElementById('aiResponseContainer');
+
             let inundationStatus = currentData.inundationYear ? `diprediksi tenggelam permanen pada tahun ${currentData.inundationYear}` : "cenderung aman dari tenggelam total abad ini";
             if (currentData.elevation <= 0) inundationStatus = "sudah berada di bawah nol elevasi (perairan).";
 
@@ -377,56 +395,17 @@ Elevasi: ${currentData.elevation.toFixed(2)} meter dpl.
 Laju Penurunan Tanah: ${currentData.subRate.toFixed(2)} mm/tahun.
 Berdasarkan metrik tersebut, wilayah ini ${inundationStatus}.
 
-Jelaskan mengapa dinamika alam di daerah ini bisa terjadi seperti itu. Ceritakan kondisi sosial-lingkungan atau sebutkan berita/isu nyata terkini terkait bencana lingkungan atau upaya mitigasi di daerah ini.`;
+Jelaskan mengapa dinamika alam di daerah ini bisa terjadi seperti itu. Ceritakan kondisi sosial-lingkungan atau sebutkan berita/isu nyata terkini terkait bencana lingkungan atau upaya mitigasi di daerah ini. Buat 2-3 paragraf saja yang padat informasi, langsung ke poin.`;
 
             try {
                 const aiTextResponse = await fetchGeminiWithBackoff(prompt);
                 aiContainer.innerHTML = marked.parse(aiTextResponse);
             } catch (error) {
-                aiContainer.innerHTML = `<div class="text-red-500 font-semibold flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Gagal memuat respon AI. Pastikan lingkungan aplikasi mengizinkan pemanggilan Gemini API.</div>`;
+                console.error("Gemini API Error:", error);
+                aiContainer.innerHTML = `<div class="text-red-500 font-semibold">Gagal memuat respon AI. Pastikan lingkungan mendukung API otomatis. Error: ${error.message}</div>`;
             }
         }
 
         // 8. ORKESTRASI UTAMA 
         async function executeSpatialAnalysis(lat, lon) {
-            currentData.slrRate = 4.5; 
-            
-            // Ekstrak Nama
-            const locName = await fetchLocationName(lat, lon);
-            currentData.locationName = locName;
-            document.getElementById('locationName').innerText = locName;
-
-            // Cari Gambar di Wikipedia!
-            const imgUrl = await fetchLocationImage(locName);
-            if(imgUrl) {
-                document.getElementById('locationImageBanner').style.backgroundImage = `url('${imgUrl}')`;
-            } else {
-                document.getElementById('locationImageBanner').style.backgroundImage = `url('${FALLBACK_IMAGE}')`;
-            }
-
-            // Data Teknis
-            const elev = await fetchRealElevation(lat, lon);
-            const subRate = getEstimatedSubsidence(lat, lon);
-            currentData.elevation = elev;
-            currentData.subRate = subRate;
-
-            await fetchOceanDynamics(lat, lon);
-            updateProyeksiVisuals();
-            await triggerGeminiAI();
-        }
-
-        document.getElementById('startYear').addEventListener('change', updateProyeksiVisuals);
-        document.getElementById('endYear').addEventListener('change', updateProyeksiVisuals);
-
-        document.getElementById('exploreBtn').addEventListener('click', () => {
-            document.getElementById('landing-page').classList.add('hidden-page');
-            setTimeout(() => { document.getElementById('dashboard-page').classList.remove('hidden-page'); initMap(); }, 500);
-        });
-        document.getElementById('backBtn').addEventListener('click', () => {
-            document.getElementById('dashboard-page').classList.add('hidden-page');
-            setTimeout(() => { document.getElementById('landing-page').classList.remove('hidden-page'); }, 500);
-        });
-
-    </script>
-</body>
-</html>
+            currentData.slrRate = 4.5;
