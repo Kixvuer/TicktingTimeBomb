@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Monitoring SLR Relatif & Dinamika Pesisir</title>
+    <title>TICKING TIME BOMB - Peringatan Kenaikan Muka Air Laut</title>
     
     <!-- ========================================== -->
     <!-- EXTERNAL LIBRARIES -->
@@ -12,37 +12,35 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <!-- ========================================== -->
     <!-- CUSTOM CSS -->
     <!-- ========================================== -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
         
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
         #map { z-index: 10; cursor: crosshair; }
         .leaflet-popup-content-wrapper { background: #0f172a; color: #bae6fd; border-radius: 8px; font-family: 'Inter', monospace; }
         .leaflet-popup-tip { background: #0f172a; }
         
-        .loader { border-top-color: #0ea5e9; animation: spinner 1.5s linear infinite; }
+        .loader { border-top-color: #ef4444; animation: spinner 1.5s linear infinite; }
         @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
         
+        /* Smooth transitions */
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         .dark-glass { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
         #locationImageBanner { transition: background-image 0.5s ease-in-out; }
         
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* Style for active tab */
-        .tab-active { background-color: #0284c7; color: white; border-color: #0284c7; }
-        .tab-inactive { background-color: #f8fafc; color: #475569; border-color: #e2e8f0; }
-        .tab-inactive:hover { background-color: #e2e8f0; color: #0f172a; }
 
         @media print {
             .no-print { display: none !important; }
@@ -56,363 +54,246 @@
     </style>
 </head>
 
-<body class="text-slate-800 antialiased selection:bg-sky-200 selection:text-sky-900 overflow-x-hidden">
+<body class="text-slate-800 antialiased selection:bg-red-200 selection:text-red-900 overflow-x-hidden">
 
     <!-- ========================================== -->
-    <!-- LANDING PAGE -->
+    <!-- LANDING PAGE (TICKING TIME BOMB THEME) -->
     <!-- ========================================== -->
-    <section id="landing-page" class="min-h-screen flex flex-col justify-center items-center bg-slate-900 text-white p-6 relative z-50 no-print" style="display: flex;">
-        <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#38bdf8 1px, transparent 1px); background-size: 32px 32px;"></div>
-        
+    <section id="landing-page" class="min-h-screen flex flex-col justify-center items-center bg-slate-950 text-white p-6 relative z-50 no-print" style="display: flex;">
+        <!-- Background Pattern & Red Glow -->
+        <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#ef4444 1px, transparent 1px); background-size: 32px 32px;"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-red-600 rounded-full blur-[150px] opacity-20 pointer-events-none"></div>
+
         <div class="max-w-5xl text-center space-y-6 relative z-50">
-            <div class="inline-flex items-center space-x-2 bg-sky-900/50 border border-sky-500/30 px-4 py-1.5 rounded-full mb-4">
-                <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+            <div class="inline-flex items-center space-x-2 bg-red-950/80 border border-red-500/50 px-5 py-2 rounded-full mb-4 shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                <span class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
                 </span>
-                <span class="text-xs font-semibold text-sky-300 uppercase tracking-widest">Sistem Oseanografi v3.0 (Ultimate)</span>
+                <span class="text-[11px] font-bold text-red-400 uppercase tracking-[0.2em]">Peringatan Bahaya Ekologi</span>
             </div>
-            <h1 class="text-5xl md:text-7xl font-extrabold text-white leading-tight mb-4 tracking-tight">
-                Dashboard Spasial<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400">Pesisir & Kelautan</span>
-            </h1>
-            <p class="text-slate-400 max-w-2xl mx-auto mb-10 text-lg leading-relaxed">Platform analisis geospasial kelautan yang terintegrasi dengan jaringan satelit Copernicus CMEMS, dilengkapi ruang kerja simulasi teknis untuk insinyur pesisir.</p>
             
-            <button onclick="startApp()" class="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-sky-600 border border-transparent rounded-xl hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-600 overflow-hidden shadow-[0_0_40px_rgba(2,132,199,0.4)] hover:shadow-[0_0_60px_rgba(2,132,199,0.6)] cursor-pointer">
-                <span class="mr-2 text-lg">Inisialisasi Workspace</span>
-                <svg class="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            <h1 class="text-6xl md:text-8xl font-black text-white leading-tight mb-4 tracking-tighter">
+                TICKING <span class="text-transparent bg-clip-text bg-gradient-to-br from-red-500 via-orange-500 to-yellow-500">TIME BOMB</span>
+            </h1>
+            
+            <p class="text-slate-300 max-w-2xl mx-auto mb-10 text-lg md:text-xl leading-relaxed font-light">
+                Jam terus berdetak. Wilayah pesisir menghadapi ancaman ganda mematikan: <b class="text-white">penurunan tanah yang masif</b> dan <b class="text-white">kenaikan muka air laut global</b>. Hitung sisa waktu sebelum daratan tertelan genangan permanen.
+            </p>
+            
+            <button onclick="startApp()" class="group relative inline-flex items-center justify-center px-10 py-5 font-bold text-white transition-all duration-300 bg-red-600 border border-transparent rounded-xl hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 focus:ring-offset-red-600 overflow-hidden shadow-[0_0_40px_rgba(239,68,68,0.5)] hover:shadow-[0_0_60px_rgba(239,68,68,0.7)] cursor-pointer">
+                <span class="mr-3 text-lg tracking-wide uppercase">Hitung Waktu Mundur</span>
+                <svg class="w-6 h-6 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
             </button>
         </div>
     </section>
 
     <!-- ========================================== -->
-    <!-- DASHBOARD PAGE (MAIN WORKSPACE) -->
+    <!-- DASHBOARD PAGE (WORKSPACE) -->
     <!-- ========================================== -->
-    <section id="dashboard-page" class="min-h-screen w-full relative pt-0 bg-slate-100" style="display: none;">
+    <section id="dashboard-page" class="min-h-screen w-full relative pt-0" style="display: none;">
         
         <!-- HEADER NAVBAR -->
-        <div class="w-full bg-white/95 backdrop-blur-md border-b border-slate-200 text-slate-800 flex flex-col md:flex-row justify-between items-center px-6 py-3 shadow-sm z-50 relative no-print sticky top-0 gap-4 md:gap-0">
-            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 bg-sky-600 rounded-lg flex items-center justify-center shadow-inner">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <span class="font-extrabold text-lg tracking-tight text-slate-900">GeoOcean<span class="text-sky-600">.Sys</span></span>
+        <div class="w-full bg-white/80 backdrop-blur-md border-b border-slate-200 text-slate-800 flex justify-between items-center px-6 py-3 shadow-sm z-50 relative no-print sticky top-0">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center shadow-inner">
+                    <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 21H23L12 2ZM12 6L19.53 19H4.47L12 6ZM11 10V14H13V10H11ZM11 16V18H13V16H11Z"></path></svg>
                 </div>
-                
-                <button onclick="goBack()" class="md:hidden text-[10px] font-bold bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded transition border border-red-200">KELUAR</button>
+                <span class="font-black text-lg tracking-tight text-slate-900 uppercase">Ticking<span class="text-red-600">TimeBomb</span></span>
             </div>
-
-            <!-- TAB SWITCHER (NEW) -->
-            <div class="flex items-center space-x-2 bg-slate-100 p-1 rounded-lg border border-slate-200 w-full md:w-auto overflow-x-auto">
-                <button id="btnTabSpatial" onclick="switchTab('spatial')" class="tab-active px-4 py-1.5 text-xs font-bold rounded shadow-sm transition whitespace-nowrap flex items-center">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-                    Analisis Spasial
+            <div class="flex items-center gap-3">
+                <button onclick="exportToCSV()" class="hidden md:inline-flex items-center text-[11px] font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 px-3 py-2 rounded-lg transition shadow-sm border border-slate-200">
+                    <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Eksport Data
                 </button>
-                <button id="btnTabCalc" onclick="switchTab('calc')" class="tab-inactive px-4 py-1.5 text-xs font-bold rounded transition border border-transparent whitespace-nowrap flex items-center">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                    Kalkulator Pesisir
+                <button onclick="window.print()" class="hidden md:inline-flex items-center text-[11px] font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 px-3 py-2 rounded-lg transition shadow-sm border border-slate-200">
+                    <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    Cetak Peringatan
                 </button>
-            </div>
-
-            <div class="hidden md:flex items-center gap-3">
-                <button onclick="exportToCSV()" class="items-center text-[11px] font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 px-3 py-2 rounded-lg transition shadow-sm border border-slate-200">
-                    Eksport CSV
-                </button>
-                <button onclick="window.print()" class="items-center text-[11px] font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 px-3 py-2 rounded-lg transition shadow-sm border border-slate-200">
-                    Cetak PDF
-                </button>
-                <div class="w-px h-6 bg-slate-300 mx-1"></div>
-                <button onclick="goBack()" class="text-[11px] font-bold bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-4 py-2 rounded-lg transition border border-red-200 hover:border-red-600">
-                    Akhiri Sesi
+                <div class="w-px h-6 bg-slate-300 mx-1 hidden md:block"></div>
+                <button onclick="goBack()" class="text-[11px] font-bold bg-slate-900 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition border border-slate-800 hover:border-red-600">
+                    Tinggalkan Sistem
                 </button>
             </div>
         </div>
 
-        <div class="w-full max-w-[1400px] mx-auto p-4 md:p-6 space-y-6">
+        <div class="w-full max-w-[1400px] mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
             
-            <!-- ========================================== -->
-            <!-- TAB 1: ANALISIS SPASIAL (Map & Dashboard) -->
-            <!-- ========================================== -->
-            <div id="content-spatial" class="space-y-6 animate-fade-in block">
+            <!-- SEARCH BAR -->
+            <div class="w-full bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex gap-2 no-print relative z-20">
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <input type="text" id="searchInput" placeholder="Cari kota pesisir yang terancam (Contoh: Demak, Jakarta Utara, Pekalongan)..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-shadow text-slate-800 font-medium">
+                </div>
+                <button onclick="searchLocation()" class="bg-slate-900 hover:bg-red-600 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition tracking-wide">Cari Target</button>
+            </div>
+
+            <!-- MAIN GRID -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                <!-- SEARCH BAR -->
-                <div class="w-full bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex gap-2 no-print relative z-20">
-                    <div class="relative flex-1">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        </div>
-                        <input type="text" id="searchInput" placeholder="Cari kota, wilayah pesisir, atau perairan (Contoh: Demak, Teluk Jakarta)..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition-shadow text-slate-800 font-medium">
-                    </div>
-                    <button onclick="searchLocation()" class="bg-sky-600 hover:bg-sky-500 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition tracking-wide">Cari Target</button>
-                </div>
-
-                <!-- MAIN GRID SPASIAL -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- KOLOM KIRI (PETA & GRAFIK) -->
+                <div class="lg:col-span-8 flex flex-col gap-6">
                     
-                    <!-- KOLOM KIRI (PETA & GRAFIK) -->
-                    <div class="lg:col-span-8 flex flex-col gap-6">
-                        
-                        <!-- WRAPPER PETA -->
-                        <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 relative">
-                            <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg shadow-md border border-slate-100 flex items-center pointer-events-none no-print">
-                                <span class="relative flex h-2 w-2 mr-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>
-                                <span class="text-[10px] font-bold text-slate-600 tracking-wider">LIVE SENSOR</span>
-                            </div>
-                            
-                            <div id="map" style="width: 100%; height: 450px;" class="rounded-xl border border-slate-200"></div>
-                            
-                            <!-- Overlay Loading Peta -->
-                            <div id="mapLoading" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-2xl z-20 hidden flex justify-center items-center">
-                                <div class="bg-white px-6 py-4 rounded-xl shadow-2xl text-slate-800 font-bold flex items-center gap-3">
-                                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-sky-500 h-6 w-6"></div>
-                                    <span id="loadingText" class="text-sm">Menarik Telemetri Satelit...</span>
-                                </div>
-                            </div>
+                    <!-- WRAPPER PETA -->
+                    <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 relative">
+                        <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg shadow-md border border-slate-100 flex items-center pointer-events-none no-print">
+                            <span class="relative flex h-2 w-2 mr-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span></span>
+                            <span class="text-[10px] font-bold text-slate-700 tracking-wider">LIVE OBSERVATION</span>
                         </div>
-
-                        <!-- WRAPPER GRAFIK -->
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
-                            <div class="flex flex-wrap justify-between items-center mb-6 gap-4 border-b border-slate-100 pb-4">
-                                <div>
-                                    <h3 id="chartTitle" class="text-lg font-extrabold text-slate-800 flex items-center">
-                                        <svg class="w-5 h-5 mr-2 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                                        Proyeksi Elevasi Daratan vs MSL
-                                    </h3>
-                                    <p class="text-xs text-slate-500 mt-1">Simulasi titik persilangan inundasi pesisir (Datum: Geoid Lokal).</p>
-                                </div>
-                                
-                                <!-- Pengaturan Tahun Dinamis -->
-                                <div class="flex items-center bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-sm no-print">
-                                    <span class="text-slate-400 font-semibold text-[10px] uppercase tracking-widest ml-2 mr-2">Rentang</span>
-                                    <input type="number" id="startYear" value="2026" class="w-16 border-none bg-white shadow-sm rounded px-2 py-1.5 text-center font-mono focus:ring-2 focus:ring-sky-500 text-slate-700 font-bold">
-                                    <span class="mx-2 text-slate-300">-</span>
-                                    <input type="number" id="endYear" value="2100" class="w-16 border-none bg-white shadow-sm rounded px-2 py-1.5 text-center font-mono focus:ring-2 focus:ring-sky-500 text-slate-700 font-bold mr-1">
-                                </div>
-                            </div>
-                            
-                            <div class="h-[300px] relative w-full">
-                                <canvas id="relativeChart"></canvas>
+                        
+                        <div id="map" style="width: 100%; height: 450px;" class="rounded-xl border border-slate-200"></div>
+                        
+                        <!-- Overlay Loading Peta -->
+                        <div id="mapLoading" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-2xl z-20 hidden flex justify-center items-center">
+                            <div class="bg-white px-6 py-4 rounded-xl shadow-2xl text-slate-800 font-bold flex items-center gap-3">
+                                <div class="loader ease-linear rounded-full border-4 border-t-4 border-red-500 h-6 w-6"></div>
+                                <span id="loadingText" class="text-sm">Menarik Telemetri Satelit...</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- KOLOM KANAN (SIDEBAR METRIK & COPERNICUS) -->
-                    <div class="lg:col-span-4 flex flex-col gap-6 h-full">
+                    <!-- WRAPPER GRAFIK -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+                        <div class="flex flex-wrap justify-between items-center mb-6 gap-4 border-b border-slate-100 pb-4">
+                            <div>
+                                <h3 id="chartTitle" class="text-lg font-extrabold text-slate-800 flex items-center tracking-tight">
+                                    <svg class="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                                    Hitung Mundur Inundasi (Elevasi vs MSL)
+                                </h3>
+                                <p class="text-xs text-slate-500 mt-1">Simulasi titik persilangan di mana daratan secara permanen tertelan air laut.</p>
+                            </div>
+                            
+                            <div class="flex items-center bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-sm no-print">
+                                <span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest ml-2 mr-2">Rentang</span>
+                                <input type="number" id="startYear" value="2026" class="w-16 border-none bg-white shadow-sm rounded px-2 py-1.5 text-center font-mono focus:ring-2 focus:ring-red-500 text-slate-700 font-bold">
+                                <span class="mx-2 text-slate-300">-</span>
+                                <input type="number" id="endYear" value="2100" class="w-16 border-none bg-white shadow-sm rounded px-2 py-1.5 text-center font-mono focus:ring-2 focus:ring-red-500 text-slate-700 font-bold mr-1">
+                            </div>
+                        </div>
                         
-                        <!-- KARTU LOKASI -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0">
-                            <div id="locationImageBanner" class="h-32 w-full bg-slate-200 bg-cover bg-center relative" style="background-image: url('https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=600&auto=format&fit=crop');">
-                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
-                                <div class="absolute bottom-3 left-4 right-4">
-                                    <h2 id="locationName" class="text-lg font-bold text-white leading-tight drop-shadow-md truncate">Pilih Titik di Peta</h2>
-                                    <p class="text-[10px] font-mono text-sky-300 mt-1 flex gap-2">
-                                        <span>LAT: <span id="authLat">-</span></span>
-                                        <span class="text-slate-400">|</span>
-                                        <span>LON: <span id="authLon">-</span></span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- KARTU OTENTIKASI COPERNICUS CMEMS -->
-                        <div class="dark-glass rounded-2xl shadow-xl border border-slate-700 p-5 text-white shrink-0 relative overflow-hidden">
-                            <div class="absolute -right-6 -top-6 opacity-10">
-                                <svg class="w-24 h-24 text-sky-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM11 19.93C7.05 19.43 4 16.05 4 12C4 7.95 7.05 4.57 11 4.07V19.93ZM13 4.07C16.95 4.57 20 7.95 20 12C20 16.05 16.95 19.43 13 19.93V4.07Z"></path></svg>
-                            </div>
-                            
-                            <div class="relative z-10">
-                                <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-sm font-bold text-sky-400 flex items-center">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                                        Akses Data CMEMS
-                                    </h3>
-                                    <span class="text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">Secure</span>
-                                </div>
-                                
-                                <div class="space-y-3 mb-4">
-                                    <div>
-                                        <input type="text" id="cmemsUser" placeholder="CMEMS Username" class="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-2.5 text-xs focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition placeholder-slate-500 text-slate-200 font-mono">
-                                    </div>
-                                    <div>
-                                        <input type="password" id="cmemsPass" placeholder="CMEMS Password" class="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-2.5 text-xs focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition placeholder-slate-500 text-slate-200 font-mono">
-                                    </div>
-                                </div>
-                                
-                                <button id="copernicusBtn" onclick="triggerCopernicusFetch()" class="w-full bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 text-white text-[11px] font-bold py-2.5 rounded-lg transition shadow-lg flex justify-center items-center uppercase tracking-wider">
-                                    Ekstrak Raster SLA
-                                </button>
-                                <div id="copernicusStatus" class="mt-3 text-[10px] text-center min-h-[14px] font-medium text-slate-300"></div>
-                            </div>
-                        </div>
-
-                        <!-- KARTU METRIK LINGKUNGAN -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex-1 flex flex-col p-5">
-                            <h3 class="text-xs font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2 flex items-center uppercase tracking-wider">
-                                <svg class="w-4 h-4 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                                Metrik Oseanografi
-                            </h3>
-                            
-                            <!-- Grid Data -->
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                    <span class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">Elevasi Tanah</span>
-                                    <span class="text-xl font-black text-slate-700"><span id="elevDisplay">0.00</span><span class="text-xs text-slate-400 ml-1 font-medium">m</span></span>
-                                </div>
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                    <span class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">Amblesan</span>
-                                    <span class="text-xl font-black text-orange-500"><span id="subRateDisplay">0.0</span><span class="text-xs text-slate-400 ml-1 font-medium">mm/yr</span></span>
-                                </div>
-                                <div class="bg-sky-50/50 p-3 rounded-xl border border-sky-100 col-span-2 flex justify-between items-center">
-                                    <div>
-                                        <span class="block text-[10px] text-sky-700 uppercase tracking-widest font-semibold mb-1">Trend Anomali Laut (SLA)</span>
-                                        <span class="text-2xl font-black text-sky-600"><span id="slrRateDisplay">4.50</span><span class="text-xs text-sky-400 ml-1 font-medium">mm/yr</span></span>
-                                    </div>
-                                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-sky-500">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Data Dinamika Gelombang -->
-                            <div id="liveOceanData" class="mt-auto bg-slate-800 p-4 rounded-xl text-white">
-                                <div class="flex justify-between items-center w-full mb-3">
-                                    <span class="text-xs text-slate-400 font-medium">Tinggi Gelombang</span>
-                                    <span class="font-mono text-sm font-bold text-white">- m</span>
-                                </div>
-                                <div class="flex justify-between items-center w-full mb-3">
-                                    <span class="text-xs text-slate-400 font-medium">Klasifikasi WMO</span>
-                                    <span class="text-[10px] px-2 py-1 rounded bg-slate-700 text-slate-300 font-bold">-</span>
-                                </div>
-                                <div class="flex justify-between items-center w-full">
-                                    <span class="text-xs text-slate-400 font-medium">Storm Surge</span>
-                                    <span class="font-mono text-sm font-bold text-white">- m</span>
-                                </div>
-                            </div>
+                        <div class="h-[300px] relative w-full">
+                            <canvas id="relativeChart"></canvas>
                         </div>
                     </div>
+                </div>
+
+                <!-- KOLOM KANAN (SIDEBAR METRIK & COPERNICUS) -->
+                <div class="lg:col-span-4 flex flex-col gap-6 h-full">
                     
-                    <!-- KOLOM BAWAH FULL WIDTH (LAPORAN ANALISIS) -->
-                    <div class="lg:col-span-12">
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
-                            <div class="absolute top-0 left-0 w-1 h-full bg-sky-500"></div>
-                            <h3 class="font-bold text-slate-800 text-base mb-4 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                Laporan Kesimpulan Oseanografi
-                            </h3>
-                            
-                            <div id="analysisConclusion" class="text-sm text-slate-600 leading-relaxed space-y-3 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
-                                <div class="flex flex-col items-center justify-center py-6 text-slate-400 italic">
-                                    <svg class="w-10 h-10 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                    <span>Pilih target di peta atau gunakan kolom pencarian. Sistem akan menyusun laporan kelayakan tata ruang berdasarkan kalkulasi numerik.</span>
-                                </div>
+                    <!-- KARTU LOKASI -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0">
+                        <div id="locationImageBanner" class="h-32 w-full bg-slate-200 bg-cover bg-center relative" style="background-image: url('https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=600&auto=format&fit=crop');">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
+                            <div class="absolute bottom-3 left-4 right-4">
+                                <h2 id="locationName" class="text-lg font-bold text-white leading-tight drop-shadow-md truncate">Pilih Titik di Peta</h2>
+                                <p class="text-[10px] font-mono text-red-300 mt-1 flex gap-2">
+                                    <span>LAT: <span id="authLat">-</span></span>
+                                    <span class="text-slate-400">|</span>
+                                    <span>LON: <span id="authLon">-</span></span>
+                                </p>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- ========================================== -->
-            <!-- TAB 2: KALKULATOR PESISIR (Engineering Tools) -->
-            <!-- ========================================== -->
-            <div id="content-calc" class="hidden space-y-6 animate-fade-in no-print">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <h2 class="text-2xl font-extrabold text-slate-800 mb-2">Pusat Kalkulasi Teknik Pantai</h2>
-                    <p class="text-slate-500 text-sm mb-8">Instrumen perhitungan matematis standar untuk insinyur sipil pantai, oseanografer, dan perencana tata ruang pesisir.</p>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- KARTU OTENTIKASI COPERNICUS CMEMS -->
+                    <div class="dark-glass rounded-2xl shadow-xl border border-slate-700 p-5 text-white shrink-0 relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 opacity-10">
+                            <svg class="w-24 h-24 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM11 19.93C7.05 19.43 4 16.05 4 12C4 7.95 7.05 4.57 11 4.07V19.93ZM13 4.07C16.95 4.57 20 7.95 20 12C20 16.05 16.95 19.43 13 19.93V4.07Z"></path></svg>
+                        </div>
                         
-                        <!-- KALKULATOR 1: HUKUM BRUUN -->
-                        <div class="bg-slate-50 rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition">
-                            <div class="flex items-start justify-between mb-4">
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-sm font-bold text-red-400 flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                    Kalibrasi Satelit CMEMS
+                                </h3>
+                                <span class="text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">Secure</span>
+                            </div>
+                            
+                            <div class="space-y-3 mb-4">
                                 <div>
-                                    <h3 class="font-bold text-slate-800 text-lg flex items-center">
-                                        <span class="bg-sky-100 text-sky-600 p-1.5 rounded-lg mr-3"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg></span>
-                                        Aturan Bruun (Bruun Rule)
-                                    </h3>
-                                    <p class="text-xs text-slate-500 mt-1">Estimasi jarak kemunduran garis pantai akibat Sea Level Rise.</p>
+                                    <input type="text" id="cmemsUser" placeholder="CMEMS Username" class="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-2.5 text-xs focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition placeholder-slate-500 text-slate-200 font-mono">
+                                </div>
+                                <div>
+                                    <input type="password" id="cmemsPass" placeholder="CMEMS Password" class="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-2.5 text-xs focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition placeholder-slate-500 text-slate-200 font-mono">
                                 </div>
                             </div>
                             
-                            <div class="space-y-4 mb-6">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Kenaikan Muka Air Laut (S) - meter</label>
-                                    <input type="number" id="bruunS" step="0.01" placeholder="Contoh: 0.5" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none transition">
-                                </div>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tinggi Berm/Gumuk (B) - m</label>
-                                        <input type="number" id="bruunB" step="0.1" placeholder="Cth: 1.2" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none transition">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Depth of Closure (h*) - m</label>
-                                        <input type="number" id="bruunH" step="0.1" placeholder="Cth: 8.0" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none transition">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Panjang Profil Aktif (L) - meter</label>
-                                    <input type="number" id="bruunL" step="10" placeholder="Jarak garis pantai ke kedalaman closure. Cth: 500" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none transition">
-                                </div>
-                            </div>
-                            
-                            <button onclick="calculateBruun()" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold py-3 rounded-lg transition shadow-sm mb-4">
-                                Hitung Mundur Pantai
+                            <button id="copernicusBtn" onclick="triggerCopernicusFetch()" class="w-full bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold py-2.5 rounded-lg transition shadow-lg flex justify-center items-center uppercase tracking-wider">
+                                Ekstrak Anomali Laut (SLA)
                             </button>
-                            
-                            <div id="bruunResultBox" class="hidden bg-sky-50 border border-sky-200 rounded-lg p-4">
-                                <span class="block text-[10px] text-sky-600 uppercase font-bold tracking-widest mb-1">Estimasi Kemunduran Pantai (R)</span>
-                                <div class="flex items-end">
-                                    <span id="bruunResult" class="text-3xl font-black text-sky-700">0.00</span>
-                                    <span class="text-sky-600 font-bold ml-1 mb-1">meter</span>
+                            <div id="copernicusStatus" class="mt-3 text-[10px] text-center min-h-[14px] font-medium text-slate-300"></div>
+                        </div>
+                    </div>
+
+                    <!-- KARTU METRIK LINGKUNGAN -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex-1 flex flex-col p-5">
+                        <h3 class="text-xs font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2 flex items-center uppercase tracking-wider">
+                            <svg class="w-4 h-4 mr-2 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            Metrik Kerentanan
+                        </h3>
+                        
+                        <!-- Grid Data -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <span class="block text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Elevasi Tanah</span>
+                                <span class="text-xl font-black text-slate-800"><span id="elevDisplay">0.00</span><span class="text-xs text-slate-400 ml-1 font-medium">mdpl</span></span>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <span class="block text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Amblesan</span>
+                                <span class="text-xl font-black text-orange-600"><span id="subRateDisplay">0.0</span><span class="text-xs text-slate-400 ml-1 font-medium">mm/yr</span></span>
+                            </div>
+                            <div class="bg-red-50/50 p-3 rounded-xl border border-red-100 col-span-2 flex justify-between items-center">
+                                <div>
+                                    <span class="block text-[10px] text-red-700 uppercase tracking-widest font-bold mb-1">Anomali Muka Laut (SLA)</span>
+                                    <span class="text-2xl font-black text-red-600"><span id="slrRateDisplay">4.50</span><span class="text-xs text-red-400 ml-1 font-medium">mm/yr</span></span>
                                 </div>
-                                <p class="text-xs text-sky-700/80 mt-2 italic" id="bruunExplanation">Formula: R = (S * L) / (B + h*)</p>
+                                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-red-500">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- KALKULATOR 2: ENERGI GELOMBANG -->
-                        <div class="bg-slate-50 rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition">
-                            <div class="flex items-start justify-between mb-4">
-                                <div>
-                                    <h3 class="font-bold text-slate-800 text-lg flex items-center">
-                                        <span class="bg-emerald-100 text-emerald-600 p-1.5 rounded-lg mr-3"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></span>
-                                        Daya Energi Gelombang (Wave Flux)
-                                    </h3>
-                                    <p class="text-xs text-slate-500 mt-1">Kalkulasi potensi daya per meter garis puncak gelombang.</p>
-                                </div>
+                        <!-- Data Dinamika Gelombang -->
+                        <div id="liveOceanData" class="mt-auto bg-slate-900 p-4 rounded-xl text-white">
+                            <div class="flex justify-between items-center w-full mb-3">
+                                <span class="text-xs text-slate-400 font-medium">Tinggi Gelombang</span>
+                                <span class="font-mono text-sm font-bold text-white">- m</span>
                             </div>
-                            
-                            <div class="space-y-4 mb-6">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tinggi Gelombang Signifikan (Hs) - meter</label>
-                                    <input type="number" id="waveHs" step="0.1" placeholder="Contoh: 2.5" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:emerald-500 outline-none transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Periode Gelombang (Te) - detik</label>
-                                    <input type="number" id="waveTe" step="0.1" placeholder="Waktu antar gelombang. Contoh: 8.0" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition">
-                                </div>
-                                
-                                <div class="bg-slate-200/50 p-3 rounded border border-slate-200 mt-4">
-                                    <p class="text-[10px] text-slate-500 leading-relaxed"><strong class="text-slate-700">Asumsi Deep Water:</strong> Menggunakan gravitasi standar (9.81 m/s²) dan massa jenis air laut rata-rata (1025 kg/m³).</p>
-                                </div>
+                            <div class="flex justify-between items-center w-full mb-3">
+                                <span class="text-xs text-slate-400 font-medium">Klasifikasi Laut</span>
+                                <span class="text-[10px] px-2 py-1 rounded bg-slate-800 text-slate-300 font-bold">-</span>
                             </div>
-                            
-                            <button onclick="calculateWavePower()" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold py-3 rounded-lg transition shadow-sm mb-4 mt-auto">
-                                Hitung Daya Gelombang
-                            </button>
-                            
-                            <div id="waveResultBox" class="hidden bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                                <span class="block text-[10px] text-emerald-600 uppercase font-bold tracking-widest mb-1">Potensi Daya Energi (P)</span>
-                                <div class="flex items-end">
-                                    <span id="waveResult" class="text-3xl font-black text-emerald-700">0.00</span>
-                                    <span class="text-emerald-600 font-bold ml-1 mb-1">kW / meter</span>
-                                </div>
-                                <p class="text-xs text-emerald-700/80 mt-2 italic">Formula: P ≈ 0.49 * Hs² * Te</p>
+                            <div class="flex justify-between items-center w-full">
+                                <span class="text-xs text-slate-400 font-medium">Ancaman Badai (Surge)</span>
+                                <span class="font-mono text-sm font-bold text-white">- m</span>
                             </div>
                         </div>
+                    </div>
 
+                </div>
+                
+                <!-- KOLOM BAWAH FULL WIDTH (LAPORAN ANALISIS) -->
+                <div class="lg:col-span-12">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
+                        <h3 class="font-black text-slate-800 text-base mb-4 flex items-center uppercase tracking-wide">
+                            <svg class="w-5 h-5 mr-2 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 21H23L12 2ZM12 6L19.53 19H4.47L12 6ZM11 10V14H13V10H11ZM11 16V18H13V16H11Z"></path></svg>
+                            Penilaian Status "Bom Waktu"
+                        </h3>
+                        
+                        <div id="analysisConclusion" class="text-sm text-slate-700 leading-relaxed space-y-3 bg-slate-50/80 p-5 rounded-xl border border-slate-100">
+                            <div class="flex flex-col items-center justify-center py-6 text-slate-400 italic">
+                                <svg class="w-10 h-10 mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <span>Pilih target di peta. Sistem akan mengkalkulasi mundur kapan area tersebut akan tenggelam berdasarkan data satelit.</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
+            </div>
         </div>
     </section>
 
@@ -427,7 +308,7 @@
         const BASE_YEAR = 2026; 
         const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=600&auto=format&fit=crop'; 
 
-        // Navigasi Transisi Halaman
+        // Navigasi UI
         function startApp() {
             document.getElementById('landing-page').style.display = 'none';
             const dashboard = document.getElementById('dashboard-page');
@@ -443,88 +324,7 @@
             landing.classList.add('animate-fade-in');
         }
 
-        // =====================================
-        // LOGIKA TAB SWITCHER
-        // =====================================
-        function switchTab(tabId) {
-            const contentSpatial = document.getElementById('content-spatial');
-            const contentCalc = document.getElementById('content-calc');
-            const btnSpatial = document.getElementById('btnTabSpatial');
-            const btnCalc = document.getElementById('btnTabCalc');
-
-            if (tabId === 'spatial') {
-                contentSpatial.classList.remove('hidden');
-                contentSpatial.classList.add('block');
-                contentCalc.classList.remove('block');
-                contentCalc.classList.add('hidden');
-                
-                btnSpatial.className = 'tab-active px-4 py-1.5 text-xs font-bold rounded shadow-sm transition whitespace-nowrap flex items-center';
-                btnCalc.className = 'tab-inactive px-4 py-1.5 text-xs font-bold rounded transition border border-transparent whitespace-nowrap flex items-center';
-                
-                // Mencegah glitch map (grey tiles) saat tab hidden/shown
-                if(map) { setTimeout(() => { map.invalidateSize(); }, 150); }
-            } else {
-                contentSpatial.classList.remove('block');
-                contentSpatial.classList.add('hidden');
-                contentCalc.classList.remove('hidden');
-                contentCalc.classList.add('block');
-
-                btnSpatial.className = 'tab-inactive px-4 py-1.5 text-xs font-bold rounded transition border border-transparent whitespace-nowrap flex items-center';
-                btnCalc.className = 'tab-active px-4 py-1.5 text-xs font-bold rounded shadow-sm transition whitespace-nowrap flex items-center';
-            }
-        }
-
-        // =====================================
-        // LOGIKA KALKULATOR TEKNIK
-        // =====================================
-        function calculateBruun() {
-            const S = parseFloat(document.getElementById('bruunS').value); // Sea Level Rise (m)
-            const B = parseFloat(document.getElementById('bruunB').value); // Berm height (m)
-            const h = parseFloat(document.getElementById('bruunH').value); // Depth of closure (m)
-            const L = parseFloat(document.getElementById('bruunL').value); // Active profile length (m)
-
-            if(isNaN(S) || isNaN(B) || isNaN(h) || isNaN(L) || B+h === 0) {
-                alert("Harap isi semua parameter hukum Bruun dengan angka valid.");
-                return;
-            }
-
-            const R = (S * L) / (B + h);
-            
-            const resultBox = document.getElementById('bruunResultBox');
-            const resultText = document.getElementById('bruunResult');
-            const explanation = document.getElementById('bruunExplanation');
-
-            resultBox.classList.remove('hidden');
-            resultText.innerText = R.toFixed(2);
-            
-            let status = R > 5 ? "Kritis" : "Sedang";
-            explanation.innerText = `Berdasarkan kenaikan muka air ${S}m, garis pantai akan mundur sejauh ${R.toFixed(2)} meter ke daratan.`;
-        }
-
-        function calculateWavePower() {
-            const Hs = parseFloat(document.getElementById('waveHs').value); // Signif wave height (m)
-            const Te = parseFloat(document.getElementById('waveTe').value); // Wave period (s)
-
-            if(isNaN(Hs) || isNaN(Te)) {
-                alert("Harap isi Tinggi Gelombang dan Periode dengan angka valid.");
-                return;
-            }
-
-            // Rumus deep water wave power: P = (rho * g^2 / 64*pi) * Hs^2 * Te
-            // Konstan (rho*g^2 / 64*pi) ~ 490 W/m atau 0.49 kW/m
-            const P = 0.49 * Math.pow(Hs, 2) * Te;
-
-            const resultBox = document.getElementById('waveResultBox');
-            const resultText = document.getElementById('waveResult');
-
-            resultBox.classList.remove('hidden');
-            resultText.innerText = P.toFixed(2);
-        }
-
-
-        // =====================================
-        // LOGIKA SPASIAL & PETA (Lama)
-        // =====================================
+        // 1. Inisialisasi Peta
         function initMap() {
             if(!map) {
                 const satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, attribution: 'Tiles &copy; Esri' });
@@ -551,6 +351,7 @@
             setTimeout(() => { map.invalidateSize(); }, 300);
         }
 
+        // Pencarian Lokasi
         async function searchLocation() {
             const query = document.getElementById('searchInput').value.trim();
             if(!query) return;
@@ -571,14 +372,14 @@
                         loadingEl.classList.add('hidden');
                     }, 1500);
                 } else {
-                    // Pesan tidak menggunakan alert melainkan UI Box atau minimal agar tidak memutus UI
                     alert("Lokasi tidak ditemukan di wilayah Indonesia.");
                     loadingEl.classList.add('hidden');
                 }
-            } catch (error) { console.error("Error pencarian"); loadingEl.classList.add('hidden'); }
+            } catch (error) { alert("Error jaringan."); loadingEl.classList.add('hidden'); }
         }
         document.getElementById('searchInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') searchLocation(); });
 
+        // Pemrosesan Data Utama
         async function processNewLocation(lat, lon) {
             if (activeMarker) map.removeLayer(activeMarker);
             activeMarker = L.marker([lat, lon]).addTo(map);
@@ -591,13 +392,16 @@
             document.getElementById('loadingText').innerText = "Mengekstrak Elevasi & Dinamika Kelautan...";
             document.getElementById('mapLoading').classList.remove('hidden');
             
+            // Reset status CMEMS text
             document.getElementById('copernicusStatus').innerHTML = '';
+            // Reset SLR ke default untuk area baru sebelum sinkronisasi CMEMS
             currentData.slrRate = 4.5; 
 
             await executeSpatialAnalysis(lat, lon);
             document.getElementById('mapLoading').classList.add('hidden');
         }
 
+        // Fetch Functions
         async function fetchRealElevation(lat, lon) {
             try {
                 const res = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
@@ -649,7 +453,7 @@
                 currentData.wave = wave; currentData.surge = surge;
 
                 let waveClass = "Tak Terdeteksi";
-                let badgeColor = "bg-slate-700 text-slate-300 border-slate-600";
+                let badgeColor = "bg-slate-800 text-slate-400 border-slate-600";
                 
                 if (wave === 0 && surge === 0) { waveClass = "N/A"; }
                 else if (wave < 0.5) { waveClass = "Tenang (Calm)"; badgeColor = "bg-emerald-900/50 text-emerald-400 border-emerald-600/50"; }
@@ -660,22 +464,19 @@
                 currentData.waveClass = waveClass;
 
                 container.innerHTML = `
-                    <div class="flex justify-between items-center w-full mb-3">
+                    <div class="flex justify-between items-center w-full mb-3 border-b border-slate-700 pb-2">
                         <span class="text-xs text-slate-400 font-medium">Tinggi Gelombang</span>
                         <span class="font-mono text-sm font-bold text-white">${wave.toFixed(2)} m</span>
                     </div>
-                    <div class="flex justify-between items-center w-full mb-3">
+                    <div class="flex justify-between items-center w-full mb-3 border-b border-slate-700 pb-2">
                         <span class="text-xs text-slate-400 font-medium">Klasifikasi WMO</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded border ${badgeColor} font-bold tracking-wide">${waveClass}</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded border ${badgeColor} font-bold tracking-wide uppercase">${waveClass}</span>
                     </div>
                     <div class="flex justify-between items-center w-full">
-                        <span class="text-xs text-slate-400 font-medium">Storm Surge</span>
-                        <span class="font-mono text-sm font-bold text-white">${surge.toFixed(2)} m</span>
+                        <span class="text-xs text-slate-400 font-medium">Ancaman Surge</span>
+                        <span class="font-mono text-sm font-bold text-red-400">${surge.toFixed(2)} m</span>
                     </div>
                 `;
-                
-                // Optional: Auto-fill Wave calculator fields if user switches tab
-                document.getElementById('waveHs').value = wave.toFixed(2);
             } catch (e) {
                 currentData.wave = 0; currentData.surge = 0; currentData.waveClass = "Daratan";
                 container.innerHTML = `
@@ -686,12 +487,17 @@
             }
         }
 
+        // Simulasi Amblesan Berdasarkan Wilayah Indonesia
         function getEstimatedSubsidence(lat, lon) {
+            // Pantura Jawa (Sangat rentan)
             if (lat > -7.5 && lat < -5.5 && lon > 105.5 && lon < 114.5) return 20 + Math.random() * 60; 
+            // Pesisir Timur Sumatera (Lahan gambut rentan)
             if (lat > -4.5 && lat < 4.0 && lon > 97.0 && lon < 105.5) return 5 + Math.random() * 15; 
+            // Default stabil
             return Math.random() * 2; 
         }
 
+        // CMEMS Otorisasi Logika (Simulasi dengan Fallback Cerdas)
         async function triggerCopernicusFetch() {
             const user = document.getElementById('cmemsUser').value.trim();
             const pass = document.getElementById('cmemsPass').value.trim();
@@ -707,20 +513,27 @@
                 return; 
             }
 
+            // Animasi Loading
             const originalText = btn.innerHTML;
             btn.innerHTML = `<svg class="animate-spin h-4 w-4 text-white mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sinkronisasi WMS...`;
             btn.disabled = true;
             btn.classList.add('opacity-75', 'cursor-not-allowed');
-            statusEl.innerHTML = '<span class="text-sky-300 animate-pulse">Menghubungi Marine Data Store...</span>';
+            statusEl.innerHTML = '<span class="text-red-300 animate-pulse">Menghubungi Marine Data Store...</span>';
 
             try {
+                // Mensimulasikan pemanggilan API satelit yang aman dari CORS untuk frontend
                 await new Promise(resolve => setTimeout(resolve, 1800)); 
+                
+                // Membuat variasi SLA logis berdasarkan letak lintang
                 let dynamicSLA = 5.0 - (Math.abs(currentData.lat) * 0.05) + (Math.random() * 1.5 - 0.5); 
                 currentData.slrRate = Math.max(2.0, dynamicSLA);
+                
+                // Segarkan UI dengan data baru
                 updateProyeksiVisuals();
+
                 statusEl.innerHTML = `<span class="text-emerald-400 flex items-center justify-center"><svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Terhubung. Raster Update: SLA ${currentData.slrRate.toFixed(2)} mm/yr</span>`;
             } catch (error) {
-                statusEl.innerHTML = `<span class="text-red-400">❌ Akses ditolak.</span>`;
+                statusEl.innerHTML = `<span class="text-red-400">❌ Akses ditolak atau server tidak merespons.</span>`;
             }
 
             btn.innerHTML = originalText;
@@ -728,6 +541,7 @@
             btn.classList.remove('opacity-75', 'cursor-not-allowed');
         }
 
+        // GENERATOR LAPORAN TEKNIS DRAMATIS ("TICKING TIME BOMB" THEME)
         function generateTechnicalSummary() {
             const container = document.getElementById('analysisConclusion');
             const elev = currentData.elevation;
@@ -740,26 +554,48 @@
             let paragraf1 = "";
             let paragraf2 = "";
 
+            // Menentukan status utama
             if (elev <= 0) {
-                statusHtml = `<div class="bg-red-50 text-red-700 p-3 rounded-lg border border-red-200 font-semibold mb-3 flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> STATUS KRITIS: Lokasi Berada di Bawah Mean Sea Level (MSL)</div>`;
-                paragraf1 = `Berdasarkan ekstraksi topografi satelit, titik koordinat <strong>${currentData.locationName}</strong> pada saat ini memiliki elevasi <strong>${elev.toFixed(2)} mdpl</strong>. Ini mengindikasikan bahwa wilayah ini adalah perairan lepas, muara sungai, atau wilayah pesisir yang telah terendam genangan air laut permanen secara topografis.`;
+                statusHtml = `<div class="bg-red-950 text-red-200 p-4 rounded-xl border border-red-800 font-black mb-4 flex flex-col justify-center items-center text-center shadow-inner">
+                    <svg class="w-8 h-8 mb-2 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 21H23L12 2ZM12 6L19.53 19H4.47L12 6ZM11 10V14H13V10H11ZM11 16V18H13V16H11Z"></path></svg>
+                    <span class="text-lg tracking-widest">BOM WAKTU TELAH MELEDAK</span>
+                    <span class="text-xs font-normal mt-1 text-red-400">Lokasi Ini Sudah Berada di Bawah Mean Sea Level (MSL)</span>
+                </div>`;
+                paragraf1 = `Berdasarkan ekstraksi topografi satelit, titik koordinat <strong>${currentData.locationName}</strong> pada saat ini memiliki elevasi kritis <strong>${elev.toFixed(2)} mdpl</strong>. Secara ekologis, waktu untuk mencegah kerusakan telah habis. Wilayah ini adalah perairan lepas, muara, atau daratan yang secara topografis telah tertelan oleh laut.`;
             } else if (year && year <= targetYear) {
-                statusHtml = `<div class="bg-orange-50 text-orange-700 p-3 rounded-lg border border-orange-200 font-semibold mb-3 flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> PERINGATAN: Potensi Inundasi Permanen Tahun ${year}</div>`;
-                paragraf1 = `Perhitungan proyeksi spasial menunjukkan bahwa <strong>${currentData.locationName}</strong> sangat rentan. Dengan kombinasi elevasi awal sebesar <strong>${elev.toFixed(2)} mdpl</strong>, laju amblesan tanah (subsidence) yang terdeteksi tinggi di angka <strong>${subRate.toFixed(2)} mm/tahun</strong>, dan anomali kenaikan muka laut (SLA) <strong>${slrRate.toFixed(2)} mm/tahun</strong>, laju relatif permukaan air diproyeksikan akan melampaui elevasi daratan (garis persilangan oranye dan biru pada grafik) pada tahun <strong>${year}</strong>.`;
+                let timeLeft = year - BASE_YEAR;
+                statusHtml = `<div class="bg-orange-50 text-orange-800 p-4 rounded-xl border border-orange-200 font-black mb-4 flex flex-col justify-center items-center text-center">
+                    <svg class="w-8 h-8 mb-2 text-orange-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="text-lg tracking-widest uppercase">BOM WAKTU AKTIF: SISA ${timeLeft} TAHUN</span>
+                    <span class="text-xs font-normal mt-1 text-orange-600">Prediksi Inundasi Permanen: Tahun ${year}</span>
+                </div>`;
+                paragraf1 = `Perhitungan proyeksi spasial memicu alarm tinggi untuk <strong>${currentData.locationName}</strong>. Titik ini terhimpit oleh ancaman ganda yang sangat agresif: elevasi daratan yang tersisa hanya <strong>${elev.toFixed(2)} mdpl</strong> sedang dihisap oleh amblesan tanah masif (<strong>${subRate.toFixed(2)} mm/tahun</strong>), sementara anomali laut terus mendesak naik (<strong>${slrRate.toFixed(2)} mm/tahun</strong>). Jika tren ini tidak diintervensi, persilangan kematian (inundasi permanen) tidak dapat dihindari pada tahun <strong>${year}</strong>.`;
             } else {
-                statusHtml = `<div class="bg-emerald-50 text-emerald-700 p-3 rounded-lg border border-emerald-200 font-semibold mb-3 flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> RELATIF AMAN: Tidak Ada Indikasi Genangan Permanen Hingga ${targetYear}</div>`;
-                paragraf1 = `Wilayah <strong>${currentData.locationName}</strong> diklasifikasikan sebagai area yang relatif stabil. Elevasi daratan tercatat cukup aman di <strong>${elev.toFixed(2)} mdpl</strong>. Meskipun terdapat tren anomali kenaikan laut global sebesar <strong>${slrRate.toFixed(2)} mm/tahun</strong> dan amblesan <strong>${subRate.toFixed(2)} mm/tahun</strong>, total defisit relatif tidak cukup signifikan untuk menyebabkan tenggelamnya daratan pada proyeksi tahun ${targetYear}.`;
+                statusHtml = `<div class="bg-emerald-50 text-emerald-800 p-4 rounded-xl border border-emerald-200 font-black mb-4 flex flex-col justify-center items-center text-center">
+                    <svg class="w-8 h-8 mb-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="text-lg tracking-widest uppercase">ZONA RELATIF AMAN</span>
+                    <span class="text-xs font-normal mt-1 text-emerald-600">Bebas dari Tenggelam Total Hingga ${targetYear}</span>
+                </div>`;
+                paragraf1 = `Wilayah <strong>${currentData.locationName}</strong> masih memiliki benteng pertahanan alami. Elevasi daratan tercatat cukup aman di <strong>${elev.toFixed(2)} mdpl</strong>. Meskipun terdampak anomali kenaikan laut global sebesar <strong>${slrRate.toFixed(2)} mm/tahun</strong> dan amblesan <strong>${subRate.toFixed(2)} mm/tahun</strong>, total laju penurunan relatif belum mencapai ambang batas ledakan ekologis pada rentang proyeksi tahun ${targetYear}.`;
             }
 
+            // Paragraf 2: Kondisi Kelautan
             if (currentData.waveClass === "Daratan" || currentData.waveClass === "N/A" || elev > 10) {
-                paragraf2 = `Karena titik ini terletak jauh dari zona interaksi gelombang pesisir aktif (inland), ancaman yang lebih mendesak biasanya bukan berasal dari gelombang pasang, melainkan manajemen drainase darat dan intrusi air asin ke dalam akuifer jika laju ekstraksi air tanah tidak dikendalikan.`;
+                paragraf2 = `Namun perlu dicatat, karena letaknya yang terisolasi dari hempasan ombak langsung (inland), ancaman utama di zona ini bukanlah terjangan air pasang laut, melainkan intrusi air asin ke sumur warga dan banjir drainase darat (banjir rob yang tertahan di mangkok daratan akibat subsidence muka tanah).`;
             } else {
-                paragraf2 = `Secara hidrodinamis, kawasan pesisir ini berhadapan langsung dengan sistem perairan yang memiliki standar observasi gelombang WMO di kelas <strong>"${currentData.waveClass}"</strong> (gelombang <strong>${currentData.wave.toFixed(2)} meter</strong>). Hal ini menjadi faktor pengali risiko (multiplier effect). Saat terjadi siklus pasang purnama (Spring Tide) yang bersamaan dengan badai, limpasan air (Storm Surge sebesar <strong>${currentData.surge.toFixed(2)} meter</strong>) dapat menciptakan banjir rob ekstrim jauh sebelum tahun tenggelam teoritisnya tercapai. Rekomendasi teknis: Pembangunan <em>sea wall</em> dan pemanfaatan kalkulator kemunduran profil pantai (Bruun Rule) di Tab Kalkulator.`;
+                paragraf2 = `Ancaman ini diperparah (multiplier effect) oleh posisi hidrodinamisnya yang menghadap sistem perairan berkelas WMO <strong>"${currentData.waveClass}"</strong> (ketinggian gelombang <strong>${currentData.wave.toFixed(2)} meter</strong>). Limpasan badai laut (Storm Surge) setinggi <strong>${currentData.surge.toFixed(2)} meter</strong> berpotensi menciptakan banjir rob ekstrem yang dapat meledakkan pertahanan darat jauh sebelum tahun kalkulasi teori tercapai. Dibutuhkan peninggian tanggul masif (Giant Sea Wall) secepatnya.`;
             }
 
-            container.innerHTML = `${statusHtml}<div class="space-y-3 text-justify"><p>${paragraf1}</p><p>${paragraf2}</p></div>`;
+            container.innerHTML = `
+                ${statusHtml}
+                <div class="space-y-4 text-justify font-medium">
+                    <p>${paragraf1}</p>
+                    <p>${paragraf2}</p>
+                </div>
+            `;
         }
 
+        // UPDATE UI & GRAFIK (Inti Perhitungan)
         function updateProyeksiVisuals() {
             if (currentData.lat === null) return;
             const elev = currentData.elevation;
@@ -785,14 +621,17 @@
                 landElevData.push(projectedLandCm.toFixed(2));
                 seaLevelData.push(projectedSeaCm.toFixed(2));
                 
+                // Logika persilangan
                 if (projectedSeaCm >= projectedLandCm && inundationYear === null && year >= BASE_YEAR) { 
                     inundationYear = year; 
                 }
             }
             currentData.inundationYear = inundationYear;
 
+            // Render Laporan Otomatis (Tanpa AI)
             generateTechnicalSummary();
 
+            // Gambar Ulang Grafik
             if (timeSeriesChart) timeSeriesChart.destroy();
             const ctx = document.getElementById('relativeChart').getContext('2d');
             timeSeriesChart = new Chart(ctx, {
@@ -800,34 +639,45 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Elevasi Daratan (cm)', data: landElevData, borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.1)', borderWidth: 2.5, fill: true, pointRadius: 0, tension: 0.1 },
-                        { label: 'Mean Sea Level (cm)', data: seaLevelData, borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.2)', borderWidth: 2.5, fill: true, pointRadius: 0, tension: 0.1 }
+                        { label: 'Elevasi Daratan (cm)', data: landElevData, borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.1)', borderWidth: 3, fill: true, pointRadius: 0, tension: 0.1 },
+                        { label: 'Mean Sea Level (cm)', data: seaLevelData, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.2)', borderWidth: 3, fill: true, pointRadius: 0, tension: 0.1 }
                     ]
                 },
                 options: { 
-                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, 
-                    scales: { y: { title: { display: true, text: 'Elevasi Relatif (cm)', color: '#64748b' }, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } },
-                    plugins: { legend: { labels: { color: '#475569', font: { family: 'Inter' } } }, tooltip: { backgroundColor: '#0f172a', titleFont: { family: 'Inter' }, bodyFont: { family: 'Inter' } } }
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    interaction: { mode: 'index', intersect: false }, 
+                    scales: { 
+                        y: { title: { display: true, text: 'Elevasi Relatif (cm)', color: '#64748b', font: { weight: 'bold' } }, grid: { color: '#f1f5f9' } }, 
+                        x: { grid: { display: false } } 
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#1e293b', font: { family: 'Inter', weight: 'bold' } } },
+                        tooltip: { backgroundColor: '#0f172a', titleFont: { family: 'Inter' }, bodyFont: { family: 'Inter' } }
+                    }
                 }
             });
         }
 
+        // EKSPORT CSV
         function exportToCSV() {
             if(currentData.lat === null) {
                 alert("Harap pilih lokasi observasi di peta sebelum melakukan ekspor data.");
                 return;
             }
+            
             let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += `LAPORAN DATA NUMERIK PROYEKSI OSEANOGRAFI\n\n`;
+            csvContent += `LAPORAN DATA NUMERIK PROYEKSI BOM WAKTU OSEANOGRAFI\n\n`;
             csvContent += `Lokasi:,${currentData.locationName.replace(/,/g, '')}\n`;
             csvContent += `Koordinat:,Lat ${currentData.lat} | Lon ${currentData.lon}\n`;
             csvContent += `Elevasi Aktual (mdpl):,${currentData.elevation.toFixed(2)}\n`;
-            csvContent += `Laju Amblesan (mm/yr):,${currentData.subRate.toFixed(2)}\n`;
-            csvContent += `Tren SLA (mm/yr):,${currentData.slrRate.toFixed(2)}\n`;
+            csvContent += `Laju Amblesan Tanah (mm/yr):,${currentData.subRate.toFixed(2)}\n`;
+            csvContent += `Tren Muka Air (SLA) (mm/yr):,${currentData.slrRate.toFixed(2)}\n`;
             csvContent += `Tinggi Gelombang Aktual (m):,${currentData.wave.toFixed(2)}\n`;
-            csvContent += `Klasifikasi WMO:,${currentData.waveClass}\n`;
-            csvContent += `Estimasi Tenggelam Permanen:,${currentData.inundationYear || 'Tidak terdeteksi dalam rentang observasi'}\n\n`;
-            csvContent += "Tahun,Elevasi Daratan (cm),Proyeksi Muka Air (cm)\n";
+            csvContent += `Klasifikasi Gelombang WMO:,${currentData.waveClass}\n`;
+            csvContent += `Tahun Prediksi Tenggelam:,${currentData.inundationYear || 'Tidak terdeteksi dalam rentang observasi'}\n\n`;
+
+            csvContent += "Tahun,Elevasi Daratan Tersisa (cm),Proyeksi Muka Air Laut (cm)\n";
 
             let startYear = parseInt(document.getElementById('startYear').value) || 2026;
             let endYear = parseInt(document.getElementById('endYear').value) || 2100;
@@ -842,12 +692,13 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Proyeksi_Data_${currentData.lat}.csv`);
+            link.setAttribute("download", `Proyeksi_Bom_Waktu_${currentData.lat}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
+        // ORKESTRASI PEMANGGILAN DATA
         async function executeSpatialAnalysis(lat, lon) {
             const locName = await fetchLocationName(lat, lon);
             currentData.locationName = locName;
@@ -862,12 +713,12 @@
             currentData.subRate = subRate;
 
             await fetchOceanDynamics(lat, lon);
-            updateProyeksiVisuals();
             
-            // Auto fill calculator based on SLA
-            document.getElementById('bruunS').value = (currentData.slrRate / 1000).toFixed(3); // Convert mm to meters
+            // Generate visual dan teks laporan
+            updateProyeksiVisuals();
         }
         
+        // Listeners for inputs
         document.getElementById('startYear').addEventListener('change', updateProyeksiVisuals);
         document.getElementById('endYear').addEventListener('change', updateProyeksiVisuals);
 
